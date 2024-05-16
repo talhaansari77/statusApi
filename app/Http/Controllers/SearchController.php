@@ -58,8 +58,8 @@ class SearchController extends Controller
                         $query->select('blocker')->where('blocker', '=', auth()->user()->id);
                     }
                 ])
-                ->where('name', 'like', $request->search . "%")
-                ->where('id', '!=', auth()->user()->id)
+                ->where('name', 'like', "%" . $request->search . "%")
+                // ->where('id', '!=', auth()->user()->id)
                 ->orderBy('id')
                 ->simplePaginate();
 
@@ -140,6 +140,32 @@ class SearchController extends Controller
                         ->where('isModel', '1')
                         ->orderBy('id')
                         ->simplePaginate();
+                } elseif ($filter3 == 'nearby') {
+                    $users = User::select('id', 'name', 'imageUrl')
+                        ->with([
+                            'following' => function ($query) {
+                                $lat = auth()->user()->lat;
+                                $lng = auth()->user()->lng;
+                                $query->select('followee as id', 'name', 'imageUrl', 'isModel', 'location', 'link', 'bio', 'lat', 'lng', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) +
+                            pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
+                                    ->withCount('following')
+                                    ->withCount('followers')
+                                    ->with([
+                                        'favoritee' => function ($query) {
+                                            $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                        }
+                                    ])
+                                    ->with([
+                                        'blockers' => function ($query) {
+                                            $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                        }
+                                    ])
+                                    ->where('isModel', '1')
+                                    ->having('distance', '<', 100);
+                                // ->orderBy('followee')
+                                // ->simplePaginate();
+                            }
+                        ])->find(auth()->user()->id);
                 } elseif ($filter2 == 'model') {
                     // dd($filter2);
                     $users = auth()->user()
@@ -265,7 +291,7 @@ class SearchController extends Controller
                                 $query->select('blocker')->where('blocker', '=', auth()->user()->id);
                             }
                         ])
-                        ->where('id', '!=', auth()->user()->id)
+                        // ->where('id', '!=', auth()->user()->id)
                         ->where('isModel', '1')
                         ->having('followers_count', '>', 10)
                         ->orderBy('id')
@@ -288,7 +314,7 @@ class SearchController extends Controller
                                 $query->select('blocker')->where('blocker', '=', auth()->user()->id);
                             }
                         ])
-                        ->where('id', '!=', auth()->user()->id)
+                        // ->where('id', '!=', auth()->user()->id)
                         ->where('isModel', '1')
                         ->whereDate('created_at', '=', now())
                         ->orderBy('id')
@@ -315,7 +341,7 @@ class SearchController extends Controller
                                 $query->select('blocker')->where('blocker', '=', auth()->user()->id);
                             }
                         ])
-                        ->where('id', '!=', auth()->user()->id)
+                        // ->where('id', '!=', auth()->user()->id)
                         ->where('isModel', '1')
                         ->having('distance', '<', 100)
                         ->orderBy('id')
@@ -339,7 +365,7 @@ class SearchController extends Controller
                                 $query->select('blocker')->where('blocker', '=', auth()->user()->id);
                             }
                         ])
-                        ->where('id', '!=', auth()->user()->id)
+                        // ->where('id', '!=', auth()->user()->id)
                         ->where('isModel', '1')
                         ->orderBy('id')
                         ->simplePaginate();
@@ -361,7 +387,7 @@ class SearchController extends Controller
                                 $query->select('blocker')->where('blocker', '=', auth()->user()->id);
                             }
                         ])
-                        ->where('id', '!=', auth()->user()->id)
+                        // ->where('id', '!=', auth()->user()->id)
                         ->having('followers_count', '>', 10)
                         ->orderBy('id')
                         ->simplePaginate();
@@ -383,7 +409,7 @@ class SearchController extends Controller
                                 $query->select('blocker')->where('blocker', '=', auth()->user()->id);
                             }
                         ])
-                        ->where('id', '!=', auth()->user()->id)
+                        // ->where('id', '!=', auth()->user()->id)
                         ->whereDate('created_at', '=', now())
                         ->orderBy('id')
                         ->simplePaginate();
@@ -409,7 +435,7 @@ class SearchController extends Controller
                                 $query->select('blocker')->where('blocker', '=', auth()->user()->id);
                             }
                         ])
-                        ->where('id', '!=', auth()->user()->id)
+                        // ->where('id', '!=', auth()->user()->id)
                         ->having('distance', '<', 100)
                         ->orderBy('id')
                         ->simplePaginate();
@@ -432,7 +458,7 @@ class SearchController extends Controller
                                 $query->select('blocker')->where('blocker', '=', auth()->user()->id);
                             }
                         ])
-                        ->where('id', '!=', auth()->user()->id)
+                        // ->where('id', '!=', auth()->user()->id)
                         ->orderBy('id')
                         ->simplePaginate();
                 }

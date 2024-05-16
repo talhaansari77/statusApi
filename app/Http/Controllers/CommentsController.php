@@ -64,7 +64,7 @@ class CommentsController extends Controller
             $comments = User::find($request->userId)->comments();
 
             return response()->json([
-                'comments' => $comments->orderBy('id', 'desc')->simplePaginate(10),
+                'comments' => $comments->simplePaginate(10),
                 'status' => true
             ]);
         } catch (\Throwable $th) {

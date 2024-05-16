@@ -9,7 +9,8 @@ use Illuminate\Http\Request;
 use App\Events\SendMessageEvent;
 use Illuminate\Support\Facades\DB;
 
-function sendMsg (Request $request, $convo){
+function sendMsg(Request $request, $convo)
+{
     $msg = Message::create($request->all());
     $msg->conversationId = $convo->id;
     $msg->save();
@@ -19,10 +20,10 @@ function sendMsg (Request $request, $convo){
         //! Using the Storage facade
         $path = 'https://' . $_SERVER['SERVER_NAME'] . '/storage/' . request()->attachment->store('attachments', 'public');
         MessageAttachment::create([
-            'messageId'=> $msg->id,
-            'path'=> $path,
+            'messageId' => $msg->id,
+            'path' => $path,
         ]);
-        
+
     }
     return $msg;
 }
@@ -43,15 +44,15 @@ class MessageController extends Controller
             })
             ->first();
         if ($convo) {
-            $msg =sendMsg($request, $convo);
-            SendMessageEvent::dispatch($msg);
-            $msg=$msg->with([
+            $msg = sendMsg($request, $convo);
+            $msg = $msg->with([
                 'sender' => function ($query) {
                     $query->select('id', 'name', 'imageUrl');
                 }
             ])
-            ->with('attachments')
-            ->find($msg->id);
+                ->with('attachments')
+                ->find($msg->id);
+            SendMessageEvent::dispatch($msg);
             return response()->json([
                 "message" => $msg,
                 "status" => true,
@@ -61,14 +62,15 @@ class MessageController extends Controller
                 "userId1" => $request->senderId,
                 "userId2" => $request->receiverId,
             ]);
-            $msg =sendMsg($request, $convo);
-            $msg=$msg->with([
+            $msg = sendMsg($request, $convo);
+            $msg = $msg->with([
                 'sender' => function ($query) {
                     $query->select('id', 'name', 'imageUrl');
                 }
             ])
-            ->with('attachments')
-            ->find($msg->id);
+                ->with('attachments')
+                ->find($msg->id);
+
             SendMessageEvent::dispatch($msg);
             return response()->json([
                 "message" => $msg,
@@ -89,51 +91,81 @@ class MessageController extends Controller
             ->with([
                 'user1' => function ($query) {
                     $query->select('id', 'name', 'imageUrl')
-                    ->with([
-                        'favoritee' => function ($query) {
-                            $query->select('userId')->where('userId', '=', auth()->user()->id);
-                        }
-                    ])
-                    ->withCount('followers')
-                    ->where('id', '!=', auth()->user()->id);
+                        ->with([
+                            'favoritee' => function ($query) {
+                                $query->select('userId')->where('userId', '=', auth()->user()->id);
+                            }
+                        ])
+                        ->withCount('followers')
+                        ->where('id', '!=', auth()->user()->id);
                 }
             ])
             ->with([
                 'user2' => function ($query) {
                     $query->select('id', 'name', 'imageUrl')
-                    ->with([
-                        'favoritee' => function ($query) {
-                            $query->select('userId')->where('userId', '=', auth()->user()->id);
-                        }
-                    ])
-                    ->withCount('followers')
-                    ->where('id', '!=', auth()->user()->id);
+                        ->with([
+                            'favoritee' => function ($query) {
+                                $query->select('userId')->where('userId', '=', auth()->user()->id);
+                            }
+                        ])
+                        ->withCount('followers')
+                        ->where('id', '!=', auth()->user()->id);
                 }
             ])
             // ->withCount("followers")
-            ->orderBy("updated_at","desc")
+            ->orderBy("updated_at", "desc")
             ->get();
 
         return response()->json([
-            "chatList"=> $convos,
-            "status"=> true,
+            "chatList" => $convos,
+            "status" => true,
         ]);
     }
 
-    public function getConversation(){
-        $conversation=Message::where("conversationId",request()->conversationId)
-        ->with([
-            'sender' => function ($query) {
-                $query->select('id', 'name', 'imageUrl');
-            }
-        ])
-        ->orderBy('created_at','desc')
-        ->simplePaginate(20);
+    public function getConversation()
+    {
+        $conversation = Message::where("conversationId", request()->conversationId)
+            ->with([
+                'sender' => function ($query) {
+                    $query->select('id', 'name', 'imageUrl');
+                }
+            ])
+            // ->orderBy('created_at','desc')
+            ->simplePaginate(20);
 
         return response()->json([
-            "conversation"=> $conversation,
-            "status"=> true,
+            "conversation" => $conversation,
+            "status" => true,
+        ]);
+    }
+
+    public function searchMessages($userId, $search)
+    {
+        $search = "%" . $search . "%";
+        $result = Message::where("senderId", $userId)
+            ->orWhere("receiverId", $userId)
+            ->where('message', 'like', $search)->get();
+
+        if ($result->count()) {
+            return response()->json([
+                'searchResult' => $result,
+                'status' => true,
             ]);
+        } else {
+            return response()->json([
+                'searchResult' => "not found",
+                'status' => true,
+            ]);
+        }
+    }
+
+    public function deleteConversation(Conversation $conversation)
+    {
+        Message::where('conversationId', $conversation->id)->delete();
+        return response()->json([
+            'searchResult' => $conversation->delete(),
+            'status' => true,
+        ]);
     }
 
     /**

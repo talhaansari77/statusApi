@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\StatusChannelController;
@@ -74,7 +75,22 @@ Route::middleware(['auth:sanctum', 'verified'])->group(static function () {
     Route::post("/sendMessage", [MessageController::class, "sendMessage"]);
     Route::post("/getChatList", [MessageController::class, "getChatList"]);
     Route::post("/getConversation", [MessageController::class, "getConversation"]);
-
+    Route::post("/searchMessages/{userId}/{search}", [MessageController::class, "searchMessages"]);
+    Route::post("/deleteConversation/{conversation}", [MessageController::class, "deleteConversation"]);
+    
+    
+    //archive
+    Route::post("/createArchive", [ArchiveController::class, "createArchive"]);
+    Route::post("/getArchive/{archive}", [ArchiveController::class, "getArchive"]);
+    Route::post("/getUserArchives/{userId}", [ArchiveController::class, "getUserArchives"]);
+    //favoriteConversation
+    Route::post("/createFavoriteConversation", [ArchiveController::class, "createFavoriteConversation"]);
+    Route::post("/getFavoriteConversation/{favoriteConversation}", [ArchiveController::class, "getFavoriteConversation"]);
+    Route::post("/getUserFavoriteConversation/{userId}", [ArchiveController::class, "getUserFavoriteConversation"]);
+    //Trash
+    Route::post("/createTrashConversation", [ArchiveController::class, "createTrashConversation"]);
+    Route::post("/getTrashConversation/{trashConversation}", [ArchiveController::class, "getTrashConversation"]);
+    Route::post("/getUserTrashConversation/{userId}", [ArchiveController::class, "getUserTrashConversation"]);
     // Route::get("users", [UserController::class, "index"]);
     // Route::post('logout', [UserController::class, 'logout']);
     // // product management

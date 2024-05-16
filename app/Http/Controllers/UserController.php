@@ -323,6 +323,13 @@ class UserController extends Controller
                 $request['wallpaperUrl'] = 'https://' . $_SERVER['SERVER_NAME'] . '/storage/' . request()->wallpaperUrl->store('wallpaperImages', 'public');
             }
             $user->update($request);
+            $user = $user->with('settings')
+            ->withCount('following')
+            ->withCount('followers')
+            ->with('comments')
+            ->with('channel')
+            // ->with('favorites')
+            ->find($user->id);
 
             return response()->json([
                 'msg1' => 'updated',

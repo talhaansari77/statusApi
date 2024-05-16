@@ -8,3 +8,6 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 Broadcast::channel('testChannel', function () {
     return true;
 });
+Broadcast::channel('onlineChannel', function ($user) {
+    return $user;
+});
