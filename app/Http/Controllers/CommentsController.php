@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\InNotificationEvent;
+use App\Jobs\CommentNotificationJob;
+use App\Models\InNotification;
 use stdClass;
 use App\Models\User;
 use App\Models\Comment;
 use App\Events\TestEvent;
 use App\Events\CommentEvent;
 use Illuminate\Http\Request;
+
 
 class CommentsController extends Controller
 {
@@ -20,8 +24,45 @@ class CommentsController extends Controller
     }
     public function sendChat(Request $request)
     {
-        TestEvent::dispatch($request->msg);
+        // included_segments=>["Active Users", "Inactive Users"]
+        // function sendMessage(){
+        $content = array(
+            "en" => 'hello'
+        );
+
+        $fields = array(
+            'app_id' => "32945f51-424b-4932-a5cc-f5dc0b54937c",
+            'included_segments' => array('All'),
+            'data' => array("foo" => "bar"),
+            'large_icon' => "ic_launcher_round.png",
+            'contents' => $content
+        );
+
+        $fields = json_encode($fields);
+        print ("\nJSON sent:\n");
+        print ($fields);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications");
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Content-Type: application/json; charset=utf-8',
+            'Authorization: Basic MjAwMjhlN2ItNGJiYi00ODg2LWE5ZTgtY2NiNzQzNTk2MGIz'
+        )
+        );
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+        curl_setopt($ch, CURLOPT_POST, TRUE);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        // return $response;
+        // }
+        // TestEvent::dispatch($request->msg);
         return response()->json([
+            'data' => $response,
             'msg' => 'msg sent',
             'status' => true
         ]);
@@ -44,6 +85,16 @@ class CommentsController extends Controller
 
             $c = Comment::create($r);
             CommentEvent::dispatch($c);
+            CommentNotificationJob::dispatch($c);
+            $n=InNotification::create([
+                "imageUrl"=>$user->imageUrl,
+                "username"=>$user->name,
+                "description"=>"Wrote on your wall",
+                "forComment"=>true,
+                "senderId"=>$user->id,
+                "receiverId"=>$request->userId,
+            ]);
+            InNotificationEvent::dispatch($n);
 
             return response()->json([
                 'comment' => $c,

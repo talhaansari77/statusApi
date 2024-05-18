@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\NotificationJob;
 use App\Models\Message;
 use App\Models\Conversation;
 use App\Models\MessageAttachment;
@@ -53,6 +54,7 @@ class MessageController extends Controller
                 ->with('attachments')
                 ->find($msg->id);
             SendMessageEvent::dispatch($msg);
+            NotificationJob::dispatch($msg);
             return response()->json([
                 "message" => $msg,
                 "status" => true,
@@ -72,6 +74,7 @@ class MessageController extends Controller
                 ->find($msg->id);
 
             SendMessageEvent::dispatch($msg);
+            NotificationJob::dispatch($msg);
             return response()->json([
                 "message" => $msg,
                 "status" => true,
@@ -88,6 +91,26 @@ class MessageController extends Controller
             where("userId1", $user->id)
             ->orWhere("userId2", $user->id)
             ->with("lastMessage")
+            ->with([
+                "archiveCon" => function ($query) {
+                    $query->select('*')->where('userId', '=', auth()->user()->id);
+                }
+            ])
+            ->with([
+                "favoriteCon" => function ($query) {
+                    $query->select('*')->where('userId', '=', auth()->user()->id);
+                }
+            ])
+            ->with([
+                "trashCon" => function ($query) {
+                    $query->select('*')->where('userId', '=', auth()->user()->id);
+                }
+            ])
+            ->with([
+                "blockedCon" => function ($query) {
+                    $query->select('*')->where('userId', '=', auth()->user()->id);
+                }
+            ])
             ->with([
                 'user1' => function ($query) {
                     $query->select('id', 'name', 'imageUrl')
@@ -116,6 +139,8 @@ class MessageController extends Controller
             ->orderBy("updated_at", "desc")
             ->get();
 
+    
+
         return response()->json([
             "chatList" => $convos,
             "status" => true,
@@ -130,6 +155,7 @@ class MessageController extends Controller
                     $query->select('id', 'name', 'imageUrl');
                 }
             ])
+            ->with('attachments')
             // ->orderBy('created_at','desc')
             ->simplePaginate(20);
 

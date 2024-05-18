@@ -104,6 +104,7 @@ class UserController extends Controller
                 request()->validate([
                     'email' => 'required|email|unique:users',
                     'password' => 'required|min:6',
+                    'deviceId' => [Rule::excludeIf(!strlen(request()->deviceId)),'string'],
                 ]);
 
 
@@ -113,7 +114,7 @@ class UserController extends Controller
                     // 'name' => request('name'),
                     'email' => request('email'),
                     'password' => bcrypt(request('password')),
-                    // 'userSettingsId' => $userSettings->id,
+                    'deviceId' => request()->deviceId,
                     'otp' => $otp
                 ]);
                 // dd(['userId'=>$user->id]);
@@ -312,6 +313,7 @@ class UserController extends Controller
                 'link' => [Rule::excludeIf(!strlen(request()->link)),'string'],
                 'gif1' => [Rule::excludeIf(!strlen(request()->gif1)),'string'],
                 'gif2' => [Rule::excludeIf(!strlen(request()->gif2)),'string'],
+                'deviceId' => [Rule::excludeIf(!strlen(request()->deviceId)),'string'],
             ]);
 
             if (request()->hasFile('imageUrl')) {

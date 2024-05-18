@@ -11,6 +11,7 @@ class Message extends Model
 
     protected $fillable = [
         "message",
+        "gif",
         "senderId",
         "receiverId",
         "conversationId",

@@ -33,6 +33,7 @@ class User extends Authenticatable
         'wallpaperUrl',
         'gif1',
         'gif2',
+        'deviceId',
         'wallpaperUrl',
         'email_verified_at',
         'isActive',

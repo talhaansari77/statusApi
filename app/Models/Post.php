@@ -12,9 +12,10 @@ class Post extends Model
         'title',
         'description',
         'imageUrl',
+        'gif',
         'views',
         'likes',
-        'channelId'
+        'channelId',
     ];
 
     public function channel()

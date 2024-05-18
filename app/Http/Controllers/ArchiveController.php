@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Archive;
-use App\Models\FavoriteConversation;
-use App\Models\TrashConversation;
+use App\Models\BlockChat;
+use App\Models\BlockList;
+use App\Models\Conversation;
 use Illuminate\Http\Request;
+use App\Models\TrashConversation;
+use App\Models\FavoriteConversation;
 
 class ArchiveController extends Controller
 {
     public function createArchive(Request $request)
     {
         try {
-            $arc=Archive::where('userId', '=', $request->userId)->first();
+            $arc = Archive::where('userId', '=', $request->userId)->first();
             if ($arc) {
                 $arc->delete();
                 return response()->json([
@@ -100,7 +104,7 @@ class ArchiveController extends Controller
     public function createFavoriteConversation(Request $request)
     {
         try {
-            $fav=FavoriteConversation::where('userId', '=', $request->userId)->first();
+            $fav = FavoriteConversation::where('userId', '=', $request->userId)->first();
             if ($fav) {
                 $fav->delete();
                 return response()->json([
@@ -115,7 +119,7 @@ class ArchiveController extends Controller
                     "data" => $a
                 ]);
             }
-            
+
         } catch (\Throwable $th) {
             return response()->json([
                 'msg' => $th->getMessage(),
@@ -189,7 +193,7 @@ class ArchiveController extends Controller
     public function createTrashConversation(Request $request)
     {
         try {
-            $trash=TrashConversation::where('userId', '=', $request->userId)->first();
+            $trash = TrashConversation::where('userId', '=', $request->userId)->first();
             if ($trash) {
                 $trash->delete();
                 return response()->json([
@@ -274,6 +278,111 @@ class ArchiveController extends Controller
             ]);
         }
     }
-    
+    public function createBlockConversation(Request $request)
+    {
+        try {
+            $c = Conversation::find($request->conversationId);
+            $receiverId = '';
+            if (!$c->userId1 == $request->userId) {
+                $receiverId = $c->userId1;
+            } else {
+                $receiverId = $c->userId2;
+            }
+            $chat = BlockChat::where('userId', '=', $request->userId)->first();
+            if ($chat) {
+                $chat->delete();
+                $blockList = BlockList::where('blocked', $receiverId)
+                    ->where('blocker', $request->userId)->first();
+                $blockList->delete();
+                return response()->json([
+                    "status" => true,
+                    "msg" => "Chat Unblocked"
+                ]);
+            } else {
+                $b = BlockChat::create($request->all());
+
+                BlockList::create([
+                    'blocker' => $request->userId,
+                    'blocked' => $request->receiverId,
+                ]);
+
+
+                return response()->json([
+                    "status" => true,
+                    "msg" => "Chat blocked",
+                    "data" => $b
+                ]);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage(),
+                'status' => false
+            ]);
+        }
+    }
+    public function getBlockConversation(BlockChat $blockChat)
+    {
+        try {
+            // $a = Archive::create($request->all());
+            return response()->json([
+                "status" => true,
+                "data" => $blockChat
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage(),
+                'status' => false
+            ]);
+        }
+    }
+    public function getUserBlockConversation($userId)
+    {
+        try {
+            $f = BlockChat::where('userId', '=', $userId)
+                ->with([
+                    'conversations' => function ($query) {
+                        $user = auth()->user();
+                        $query->where("userId1", $user->id)
+                            ->orWhere("userId2", $user->id)
+                            ->with("lastMessage")
+                            ->with([
+                                'user1' => function ($query) {
+                                    $query->select('id', 'name', 'imageUrl')
+                                        ->with([
+                                            'favoritee' => function ($query) {
+                                                $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                            }
+                                        ])
+                                        ->withCount('followers')
+                                        ->where('id', '!=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'user2' => function ($query) {
+                                    $query->select('id', 'name', 'imageUrl')
+                                        ->with([
+                                            'favoritee' => function ($query) {
+                                                $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                            }
+                                        ])
+                                        ->withCount('followers')
+                                        ->where('id', '!=', auth()->user()->id);
+                                }
+                            ]);
+                    }
+                ])
+                ->get();
+            return response()->json([
+                "status" => true,
+                "data" => $f
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage(),
+                'status' => false
+            ]);
+        }
+    }
+
 
 }

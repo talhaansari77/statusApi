@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArchiveController;
+use App\Http\Controllers\InNotificationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\StatusChannelController;
@@ -91,6 +92,12 @@ Route::middleware(['auth:sanctum', 'verified'])->group(static function () {
     Route::post("/createTrashConversation", [ArchiveController::class, "createTrashConversation"]);
     Route::post("/getTrashConversation/{trashConversation}", [ArchiveController::class, "getTrashConversation"]);
     Route::post("/getUserTrashConversation/{userId}", [ArchiveController::class, "getUserTrashConversation"]);
+    //BlockConversation
+    Route::post("/createBlockConversation", [ArchiveController::class, "createBlockConversation"]);
+    Route::post("/getBlockConversation/{blockChat}", [ArchiveController::class, "getBlockConversation"]);
+    Route::post("/getUserBlockConversation/{userId}", [ArchiveController::class, "getUserBlockConversation"]);
+    //InNotification
+    Route::post("/getInNotifications", [InNotificationController::class, "getInNotifications"]);
     // Route::get("users", [UserController::class, "index"]);
     // Route::post('logout', [UserController::class, 'logout']);
     // // product management

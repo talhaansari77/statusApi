@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
-            $table->longText('message')->nullable();
+            $table->longText('message')->default('');
+            $table->longText('gif')->default('');
             $table->foreignId('senderId')->constrained('users');
             $table->foreignId('receiverId')->nullable()->constrained('users');
             $table->foreignId('conversationId')->nullable()->constrained('conversations');

@@ -24,4 +24,20 @@ class Conversation extends Model
     public function user2(){
         return $this->belongsTo(User::class, 'userId2');
     }
+    public function archiveCon()
+    {
+        return $this->hasMany(Archive::class, "conversationId");
+    }
+    public function favoriteCon()
+    {
+        return $this->hasMany(FavoriteConversation::class, "conversationId");
+    }
+    public function trashCon()
+    {
+        return $this->hasMany(TrashConversation::class, "conversationId");
+    }
+    public function blockedCon()
+    {
+        return $this->hasMany(BlockChat::class, "conversationId");
+    }
 }

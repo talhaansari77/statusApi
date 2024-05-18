@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('title')->default('');
             $table->string('description')->default('');
-            $table->string('imageUrl')->default('');
+            $table->longText('imageUrl')->default('');
+            $table->longText('gif')->default('');
             $table->bigInteger('views')->default(0);
             $table->bigInteger('likes')->default(0);
 

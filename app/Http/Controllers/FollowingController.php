@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\InNotificationEvent;
+use App\Models\InNotification;
 use App\Models\User;
 use App\Models\Following;
 use Illuminate\Http\Request;
@@ -36,6 +38,15 @@ class FollowingController extends Controller
                 } else {
                     $r['follower'] = $follower->id;
                     Following::create($r);
+                    $n = InNotification::create([
+                        "imageUrl"=>$follower->imageUrl,
+                        "username"=>$follower->name,
+                        "description"=>"Started following you",
+                        "forFollow"=>true,
+                        "senderId"=>$follower->id,
+                        "receiverId"=>$request->followee,
+                    ]);
+                    InNotificationEvent::dispatch($n);
                     return response()->json([
                         'msg' => 'followed',
                         'status' => true

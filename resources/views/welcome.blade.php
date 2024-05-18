@@ -31,6 +31,19 @@
                     // .listen('TestEvent', (e) => {
                     //         console.log('test successful ',e.msg)
                     // })
+                    Echo.join(`onlineChannel`)
+                        .here((users) => {
+                            // ...
+                        })
+                        .joining((user) => {
+                            console.log(user.name);
+                        })
+                        .leaving((user) => {
+                            console.log(user.name);
+                        })
+                        .error((error) => {
+                            console.error(error);
+                        });
                     window.Echo.channel('chatChannel_3')
                     .listen('SendMessageEvent', (e) => {
                             console.log('chat ',e.message)
