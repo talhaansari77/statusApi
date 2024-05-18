@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('gender')->default('');
             $table->string('birthday')->default('');
             $table->string('occupation')->default('');
-            $table->string('bio')->default('');
+            $table->longText('bio')->default('');
             $table->string('link')->default('');
             $table->string('otp')->default('');
             $table->string('location')->default('');

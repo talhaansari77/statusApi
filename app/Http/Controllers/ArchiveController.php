@@ -283,28 +283,39 @@ class ArchiveController extends Controller
         try {
             $c = Conversation::find($request->conversationId);
             $receiverId = '';
-            if (!$c->userId1 == $request->userId) {
+            if (!($c->userId1 == $request->userId)) {
                 $receiverId = $c->userId1;
             } else {
                 $receiverId = $c->userId2;
             }
+            
             $chat = BlockChat::where('userId', '=', $request->userId)->first();
+            
             if ($chat) {
                 $chat->delete();
                 $blockList = BlockList::where('blocked', $receiverId)
                     ->where('blocker', $request->userId)->first();
-                $blockList->delete();
+                if ($blockList) {
+                    $blockList->delete();
+                }
                 return response()->json([
                     "status" => true,
                     "msg" => "Chat Unblocked"
                 ]);
             } else {
+                
                 $b = BlockChat::create($request->all());
-
-                BlockList::create([
-                    'blocker' => $request->userId,
-                    'blocked' => $request->receiverId,
-                ]);
+                $blockList = BlockList::where('blocked', $receiverId)
+                    ->where('blocker', $request->userId)->first();
+                // dd($blockList) ;
+                
+                
+                if (!$blockList) {
+                    BlockList::create([
+                        'blocker' => $request->userId,
+                        'blocked' => $receiverId,
+                    ]);
+                }
 
 
                 return response()->json([
