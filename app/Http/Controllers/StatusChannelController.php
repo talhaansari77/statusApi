@@ -33,6 +33,7 @@ class StatusChannelController extends Controller
             }
         ])
         ->find($user->id);
+        // uksort($arr, "my_sort");
         // ->where('id', $user->id)
         // ->get();
         // $channel = User::find($user->id)->get(['id','name']);

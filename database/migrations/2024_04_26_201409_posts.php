@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
             $table->string('title')->default('');
-            $table->string('description')->default('');
+            $table->string('description')->nullable();
             $table->longText('imageUrl')->default('');
             $table->longText('gif')->default('');
             $table->bigInteger('views')->default(0);

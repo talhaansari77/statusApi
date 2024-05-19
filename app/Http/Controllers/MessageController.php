@@ -157,7 +157,7 @@ class MessageController extends Controller
             ])
             ->with('attachments')
             // ->orderBy('created_at','desc')
-            ->simplePaginate(20);
+            ->simplePaginate(50);
 
         return response()->json([
             "conversation" => $conversation,

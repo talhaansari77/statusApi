@@ -13,8 +13,8 @@ class Post extends Model
         'description',
         'imageUrl',
         'gif',
-        'views',
-        'likes',
+        // 'views',
+        // 'likes',
         'channelId',
     ];
 
@@ -22,5 +22,15 @@ class Post extends Model
     {
         return $this->belongsTo(StatusChannel::class,'channelId');
     }
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+    public function views()
+    {
+        return $this->hasMany(View::class);
+    }
+
+
     
 }
