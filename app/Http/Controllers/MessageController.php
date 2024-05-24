@@ -139,7 +139,7 @@ class MessageController extends Controller
             ->orderBy("updated_at", "desc")
             ->get();
 
-    
+
 
         return response()->json([
             "chatList" => $convos,
@@ -161,6 +161,85 @@ class MessageController extends Controller
 
         return response()->json([
             "conversation" => $conversation,
+            "status" => true,
+        ]);
+    }
+    public function getConversationIfExist()
+    {
+        $convo = Conversation::
+            where(function ($query) {
+                $query->where(["userId1" => request()->senderId, "userId2" => request()->receiverId]);
+            })
+            ->orWhere(function ($query) {
+                $query->where(["userId1" => request()->receiverId, "userId2" => request()->senderId]);
+            })
+            ->first();
+        if ($convo) {
+            $convo = $convo
+                ->with("lastMessage")
+                ->with([
+                    "archiveCon" => function ($query) {
+                        $query->select('*')->where('userId', '=', auth()->user()->id);
+                    }
+                ])
+                ->with([
+                    "favoriteCon" => function ($query) {
+                        $query->select('*')->where('userId', '=', auth()->user()->id);
+                    }
+                ])
+                ->with([
+                    "trashCon" => function ($query) {
+                        $query->select('*')->where('userId', '=', auth()->user()->id);
+                    }
+                ])
+                ->with([
+                    "blockedCon" => function ($query) {
+                        $query->select('*')->where('userId', '=', auth()->user()->id);
+                    }
+                ])
+                ->with([
+                    'user1' => function ($query) {
+                        $query->select('id', 'name', 'imageUrl')
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->withCount('followers')
+                            ->where('id', '!=', auth()->user()->id);
+                    }
+                ])
+                ->with([
+                    'user2' => function ($query) {
+                        $query->select('id', 'name', 'imageUrl')
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->withCount('followers')
+                            ->where('id', '!=', auth()->user()->id);
+                    }
+                ])->where(function ($query) {
+                    $query->where(["userId1" => request()->senderId, "userId2" => request()->receiverId]);
+                })
+                ->orWhere(function ($query) {
+                    $query->where(["userId1" => request()->receiverId, "userId2" => request()->senderId]);
+                })->first();
+
+            return response()->json([
+                "conversation" => $convo,
+                "exist" => true,
+                "status" => true,
+            ]);
+        }
+        // ->with('attachments')
+        // ->orderBy('created_at','desc')
+        // ->simplePaginate(50);
+
+        return response()->json([
+            // "conversation" => $convo,
+            "exist" => false,
             "status" => true,
         ]);
     }
@@ -187,7 +266,11 @@ class MessageController extends Controller
 
     public function deleteConversation(Conversation $conversation)
     {
-        Message::where('conversationId', $conversation->id)->delete();
+        Message::
+            with("attachments")
+            ->where('conversationId', $conversation->id)
+            ->delete();
+        // Conversation::with()
         return response()->json([
             'searchResult' => $conversation->delete(),
             'status' => true,

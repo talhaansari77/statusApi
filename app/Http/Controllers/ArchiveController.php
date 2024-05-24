@@ -289,9 +289,13 @@ class ArchiveController extends Controller
                 $receiverId = $c->userId2;
             }
             
-            $chat = BlockChat::where('userId', '=', $request->userId)->first();
+            $chat = BlockChat::
+            where('userId', '=', $request->userId)
+            ->where('conversationId', '=', $request->conversationId)
+            ->first();
             
             if ($chat) {
+                //unBlocking Chat
                 $chat->delete();
                 $blockList = BlockList::where('blocked', $receiverId)
                     ->where('blocker', $request->userId)->first();

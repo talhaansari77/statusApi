@@ -80,6 +80,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(static function () {
     Route::post("/getConversation", [MessageController::class, "getConversation"]);
     Route::post("/searchMessages/{userId}/{search}", [MessageController::class, "searchMessages"]);
     Route::post("/deleteConversation/{conversation}", [MessageController::class, "deleteConversation"]);
+    Route::post("/getConversationIfExist", [MessageController::class, "getConversationIfExist"]);
     
     
     //archive

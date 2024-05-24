@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BlockChat;
+use App\Models\Conversation;
 use App\Models\User;
 use App\Models\BlockList;
 use Illuminate\Http\Request;
@@ -25,6 +27,20 @@ class BlockListController extends Controller
             // dd($following);
 
             if ($blocked && $blocker) {
+                    $con = Conversation::
+                    where(function ($query) {
+                        $query->where(["userId1" => auth()->user()->id, "userId2" => User::find(request()->blocked)->id]);
+                    })
+                    ->orWhere(function ($query) {
+                        $query->where(["userId1" => User::find(request()->blocked)->id, "userId2" => auth()->user()->id]);
+                    })
+                    ->first();
+                if ($con) {
+                    $bCon = BlockChat::where(['userId' => $blocker->id, 'conversationId' => $con->id])->first();
+                    if ($bCon) {
+                        $bCon->delete();
+                    }
+                }
 
                 if ($blockList) {
                     $blockList->delete();

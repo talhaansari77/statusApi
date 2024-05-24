@@ -31,7 +31,7 @@ class PostController extends Controller
             $channel->save();
             ChannelUpdatesEvent::dispatch($post);
             return response()->json([
-                'post' => Post::find($post->id),
+                'post' => Post::withCount('likes')->withCount('views')->find($post->id),
                 'status' => true
             ]);
         } catch (\Throwable $th) {
@@ -162,6 +162,9 @@ class PostController extends Controller
         return response()->json([
             'posts' => $user->channel
                 ->posts()
+                ->with(['likes'=>function($query){
+                    $query->select('*')->where('user_id', auth()->user()->id);
+                }])
                 ->withCount('likes')
                 ->withCount('views')
                 // ->orderBy('id', 'desc')
