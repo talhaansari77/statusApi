@@ -42,6 +42,8 @@ class User extends Authenticatable
         'lat',
         'lng',
         'channelId',
+        'isOnline',
+        'profileType',
     ];
 
     public function settings()
@@ -81,6 +83,10 @@ class User extends Authenticatable
     public function blocked()
     {
         return $this->belongsToMany(User::class, 'block_lists', 'block_lists.blocker', 'block_lists.blocked');
+    }
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
     }
 
 

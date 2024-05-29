@@ -24,6 +24,7 @@ class PostController extends Controller
                 $post->imageUrl = 'https://' . $_SERVER['SERVER_NAME'] . '/storage/' . request()->imageUrl->store('postImages', 'public');
                 $post->save();
             }
+            $post->user_id = auth()->user()->id;
             $post->title = auth()->user()->name;
             $post->save();
             $channel = StatusChannel::find($post->channelId);
@@ -31,7 +32,7 @@ class PostController extends Controller
             $channel->save();
             ChannelUpdatesEvent::dispatch($post);
             return response()->json([
-                'post' => Post::withCount('likes')->withCount('views')->find($post->id),
+                'post' => Post::withCount('likes')->withCount('views')->with('author')->find($post->id),
                 'status' => true
             ]);
         } catch (\Throwable $th) {

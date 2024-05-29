@@ -15,6 +15,7 @@ class Message extends Model
         "senderId",
         "receiverId",
         "conversationId",
+        "read_at",
     ];
 
     public function sender(){

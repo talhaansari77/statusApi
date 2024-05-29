@@ -15,56 +15,66 @@ class StatusChannelController extends Controller
     {
         $channel = auth()->user()->channel()->with('posts')->get();
         return response()->json([
-            "status"=> true,
-            'channel'=>$channel,
+            "status" => true,
+            'channel' => $channel,
         ]);
     }
     public function getFollowingChannel()
     {
-        $user =auth()->user();
+        $user = auth()->user();
         // $channel = $user->with('channel')->with('following')->find($user->id);
         $channel = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio')->with([
             'following' => function ($query) {
-                $query->select('users.id','name','imageUrl', 'location', 'link', 'bio')->with([
+                $query->select('users.id', 'name', 'imageUrl', 'location', 'link', 'bio')->with([
                     'channel' => function ($query) {
-                        $query->select('*')->with('lastPost');
+                        $query->select('*')->withCount("posts")->with('lastPost')
+                            ->with([
+                                'posts' => function ($query) {
+                                    $query->select('*')->with([
+                                        'views' => function ($query) {
+                                            $query->select('*')->where('user_id', auth()->user()->id);
+                                        }
+                                    ]);
+                                }
+                            ]);
                     }
                 ])->withCount('following');
             }
         ])
-        ->find($user->id);
+            ->find($user->id);
+
         // uksort($arr, "my_sort");
         // ->where('id', $user->id)
         // ->get();
         // $channel = User::find($user->id)->get(['id','name']);
         // $channel = auth()->user()->channel()->with('posts')->get();
         return response()->json([
-            "status"=> true,
-            'channel'=>$channel,
+            "status" => true,
+            'channel' => $channel,
         ]);
     }
     public function getFavoritesChannel()
     {
-        $user =auth()->user();
+        $user = auth()->user();
         // $channel = $user->with('channel')->with('following')->find($user->id);
-        $channel = User::select('id','name','imageUrl', 'location', 'link', 'bio')->with([
+        $channel = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio')->with([
             'favorites' => function ($query) {
-                $query->select('users.id','name','imageUrl', 'location', 'link', 'bio')->with([
+                $query->select('users.id', 'name', 'imageUrl', 'location', 'link', 'bio')->with([
                     'channel' => function ($query) {
                         $query->select('*')->with('lastPost');
                     }
                 ])
-                ->withCount('following');
+                    ->withCount('following');
             }
         ])
-        ->find($user->id);
+            ->find($user->id);
         // ->where('id', $user->id)
         // ->get();
         // $channel = User::find($user->id)->get(['id','name']);
         // $channel = auth()->user()->channel()->with('posts')->get();
         return response()->json([
-            "status"=> true,
-            'channel'=>$channel,
+            "status" => true,
+            'channel' => $channel,
         ]);
     }
 

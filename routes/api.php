@@ -76,11 +76,13 @@ Route::middleware(['auth:sanctum', 'verified'])->group(static function () {
     Route::post("/getFavoritesChannel", [StatusChannelController::class, "getFavoritesChannel"]);
     //chat
     Route::post("/sendMessage", [MessageController::class, "sendMessage"]);
+    Route::post("/readMessage/{message}", [MessageController::class, "readMessage"]);
     Route::post("/getChatList", [MessageController::class, "getChatList"]);
     Route::post("/getConversation", [MessageController::class, "getConversation"]);
     Route::post("/searchMessages/{userId}/{search}", [MessageController::class, "searchMessages"]);
     Route::post("/deleteConversation/{conversation}", [MessageController::class, "deleteConversation"]);
     Route::post("/getConversationIfExist", [MessageController::class, "getConversationIfExist"]);
+    Route::post("/startTypingChannel", [MessageController::class, "startTypingChannel"]);
     
     
     //archive

@@ -16,6 +16,7 @@ class Post extends Model
         // 'views',
         // 'likes',
         'channelId',
+        'User_id',
     ];
 
     public function channel()
@@ -29,6 +30,10 @@ class Post extends Model
     public function views()
     {
         return $this->hasMany(View::class);
+    }
+    public function author()
+    {
+        return $this->hasOne(User::class,'id','user_id');
     }
 
 

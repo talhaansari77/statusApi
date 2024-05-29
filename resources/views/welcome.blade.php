@@ -31,19 +31,19 @@
                     // .listen('TestEvent', (e) => {
                     //         console.log('test successful ',e.msg)
                     // })
-                    Echo.join(`onlineChannel`)
-                        .here((users) => {
-                            // ...
-                        })
-                        .joining((user) => {
-                            console.log(user.name);
-                        })
-                        .leaving((user) => {
-                            console.log(user.name);
-                        })
-                        .error((error) => {
-                            console.error(error);
-                        });
+                    // Echo.join(`onlineChannel`)
+                    //     .here((users) => {
+                    //         // ...
+                    //     })
+                    //     .joining((user) => {
+                    //         console.log(user.name);
+                    //     })
+                    //     .leaving((user) => {
+                    //         console.log(user.name);
+                    //     })
+                    //     .error((error) => {
+                    //         console.error(error);
+                    //     });
                     window.Echo.channel('chatChannel_3')
                     .listen('SendMessageEvent', (e) => {
                             console.log('chat ',e.message)
@@ -55,6 +55,10 @@
                     window.Echo.channel('commentsChannel_2')
                     .listen('CommentEvent', (e) => {
                             console.log('comment',e.comment)
+                    })
+                    window.Echo.channel('TypingChannel_24')
+                    .listen('TypingEvent', (e) => {
+                            console.log('TypingEvent',e)
                     })
                 
             })

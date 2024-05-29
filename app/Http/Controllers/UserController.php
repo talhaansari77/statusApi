@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Following;
 use App\Models\User;
 use App\Jobs\MailJob;
 use App\Mail\WelcomeMail;
@@ -280,6 +281,14 @@ class UserController extends Controller
                 $user->otp = 0;
                 $user->save();
 
+                $owner=User::where('email', 'shamrockfilms@gmail.com')->first();
+                $following=Following::where(['followee'=> $owner->id,'follower'=> $user->id])->first();
+                if(!$following){
+                    Following::create([
+                        'followee'=> $owner->id,
+                        'follower'=> $user->id,
+                    ]);
+                }
                 return response()->json([
                     'msg' => 'you are verified',
                     'token' => $token,
@@ -300,21 +309,32 @@ class UserController extends Controller
         try {
             $user = auth()->user();
             $request = request()->validate([
-                'name' => 'required|string',
+                'name' => [Rule::excludeIf(!strlen(request()->name)),'string'],
                 'location' => [Rule::excludeIf(!strlen(request()->location))],
                 'lat' => [Rule::excludeIf(!strlen(request()->lat)),'string'],
                 'lng' => [Rule::excludeIf(!strlen(request()->lng)),'string'],
-                'isModel' => 'boolean',
+                'isModel' => [Rule::excludeIf(!strlen(request()->isModel)),'boolean'],
                 'gender' => [Rule::excludeIf(!strlen(request()->gender)),'string'],
+                'profileType' => [Rule::excludeIf(!strlen(request()->profileType)),'string'],
                 'birthday' => [Rule::excludeIf(!strlen(request()->birthday)),'string'],
                 'occupation' => [Rule::excludeIf(!strlen(request()->occupation)),'string'],
-                'wallComments' => 'boolean',
+                'wallComments' => [Rule::excludeIf(!strlen(request()->wallComments)),'boolean'],
                 'bio' => [Rule::excludeIf(!strlen(request()->bio)),'string'],
                 'link' => [Rule::excludeIf(!strlen(request()->link)),'string'],
                 'gif1' => [Rule::excludeIf(!strlen(request()->gif1)),'string'],
                 'gif2' => [Rule::excludeIf(!strlen(request()->gif2)),'string'],
                 'deviceId' => [Rule::excludeIf(!strlen(request()->deviceId)),'string'],
+                'isOnline' => [Rule::excludeIf(!strlen(request()->isOnline)),'boolean'],
             ]);
+
+            if(request()->deleteWallImage){
+                $request['wallpaperUrl']='';
+            }
+            if(request()->deleteUserImage){
+                $request['imageUrl']='';
+            }
+            // $request['wallpaperUrl']='';
+            // $request['imageUrl']='';
 
             if (request()->hasFile('imageUrl')) {
                 //! Using the Storage facade

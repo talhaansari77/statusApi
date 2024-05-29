@@ -19,7 +19,8 @@ return new class extends Migration
             $table->longText('gif')->default('');
             $table->bigInteger('views')->default(0);
             $table->bigInteger('likes')->default(0);
-
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
+            
             $table->bigInteger('channelId')->unsigned();
             $table->foreign('channelId')->references('id')->on('status_channels')->onDelete("cascade");
             $table->timestamps();

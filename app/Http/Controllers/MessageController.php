@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TypingEvent;
 use App\Jobs\NotificationJob;
 use App\Models\Message;
 use App\Models\Conversation;
@@ -82,6 +83,26 @@ class MessageController extends Controller
         }
 
     }
+    public function readMessage(Message $message)
+    {
+        try {
+            $message->read_at = now();
+            $message->save();
+            return response()->json([
+                "message" => 'success',
+                "status" => true,
+            ]);
+        } catch (\Throwable $th) {
+            $message->read_at = now();
+            $message->save();
+            return response()->json([
+                "message" => $th->getMessage(),
+                "status" => false,
+            ]);
+        }
+
+
+    }
 
     public function getChatList()
     {
@@ -113,7 +134,7 @@ class MessageController extends Controller
             ])
             ->with([
                 'user1' => function ($query) {
-                    $query->select('id', 'name', 'imageUrl')
+                    $query->select('id', 'name', 'imageUrl','isOnline')
                         ->with([
                             'favoritee' => function ($query) {
                                 $query->select('userId')->where('userId', '=', auth()->user()->id);
@@ -125,7 +146,7 @@ class MessageController extends Controller
             ])
             ->with([
                 'user2' => function ($query) {
-                    $query->select('id', 'name', 'imageUrl')
+                    $query->select('id', 'name', 'imageUrl','isOnline')
                         ->with([
                             'favoritee' => function ($query) {
                                 $query->select('userId')->where('userId', '=', auth()->user()->id);
@@ -280,6 +301,17 @@ class MessageController extends Controller
     /**
      * Show the form for creating a new resource.
      */
+
+     public function startTypingChannel(Request $request){
+        $id1=intval($request->user1Id);
+        $id2=intval($request->user2Id);
+        TypingEvent::dispatch(['user1Id'=> $id1,'user2Id'=> $id2]);
+        return response()->json([
+            'status'=> true,
+            'channel'=> 'TypingChannel'.$id1 +$id2,
+            ]);
+
+     }
     public function create()
     {
         //
