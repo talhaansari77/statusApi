@@ -10,17 +10,18 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TypingEvent implements ShouldBroadcast
+class NewTypingEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $data;
+    public $users;
+
     /**
      * Create a new event instance.
      */
-    public function __construct($data)
+    public function __construct($users)
     {
-        $this->data = $data;
+        $this->users = $users;
     }
 
     /**
@@ -30,17 +31,8 @@ class TypingEvent implements ShouldBroadcast
      */
     public function broadcastOn(): array
     {
-       
         return [
-            new Channel('TypingChannel_'. $this->data['user1Id']+$this->data['user2Id']),
-        ];
-    }
-
-    public function broadcastWith(): array
-    {
-        return [
-            "user1Id" => $this->data['user1Id'],
-            "user2Id" => $this->data['user12d']
+            new Channel('TypingChannel_'.$this->users['user1Id']+$this->users['user2Id']),
         ];
     }
 }

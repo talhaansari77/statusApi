@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 // 'radians(acos(sin(radians('.$lat.')) * sin(radians(lat)) + cos(radians('.$lat.')) * cos(radians(lat)) * cos(radians('.$lng.'-lng))))* 60 * 1.1515 * 1.609344 as distance'
 // 'radians(acos(sin(radians('.$lat.')) * sin(radians(lat)) + cos(radians('.$lat.')) * cos(radians(lat)) * cos(radians('.$lng.'-lng))))* 60 * 1.1515 * 1.609344 as distance'
@@ -101,193 +102,93 @@ class SearchController extends Controller
             $users = '';
             if ($filter1 == 'following') {
 
-                // if ($filter3 == 'popular') {
-                //     // dd($filter2);
-                //     $users = auth()->user()
-                //         ->following()
-                //         ->withCount('following')
-                //         ->withCount('followers')
-                //         ->with([
-                //             'blockers' => function ($query) {
-                //                 $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                //             }
-                //         ])
-                //         ->with([
-                //             'favoritee' => function ($query) {
-                //                 $query->select('userId')->where('userId', '=', auth()->user()->id);
-                //             }
-                //         ])
-                //         ->having('followers_count', '>', 10)
-                //         ->where('isModel', '1')
-                //         ->orderBy('id')
-                //         ->simplePaginate();
-                // } elseif ($filter3 == 'new') {
-                //     $users = auth()->user()
-                //         ->following()
-                //         ->withCount('following')
-                //         ->withCount('followers')
-                //         ->with([
-                //             'blockers' => function ($query) {
-                //                 $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                //             }
-                //         ])
-                //         ->with([
-                //             'favoritee' => function ($query) {
-                //                 $query->select('userId')->where('userId', '=', auth()->user()->id);
-                //             }
-                //         ])
-                //         ->whereDate('users.created_at', '=', now())
-                //         ->where('isModel', '1')
-                //         ->orderBy('id')
-                //         ->simplePaginate();
-                // } elseif ($filter3 == 'nearby') {
-                //     $users = User::select('id', 'name', 'imageUrl')
-                //         ->with([
-                //             'following' => function ($query) {
-                //                 $lat = auth()->user()->lat;
-                //                 $lng = auth()->user()->lng;
-                //                 $query->select('followee as id', 'name', 'imageUrl', 'isModel', 'location', 'link', 'bio', 'lat', 'lng', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) +
-                //             pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
-                //                     ->withCount('following')
-                //                     ->withCount('followers')
-                //                     ->with([
-                //                         'favoritee' => function ($query) {
-                //                             $query->select('userId')->where('userId', '=', auth()->user()->id);
-                //                         }
-                //                     ])
-                //                     ->with([
-                //                         'blockers' => function ($query) {
-                //                             $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                //                         }
-                //                     ])
-                //                     ->where('isModel', '1')
-                //                     ->having('distance', '<', 100);
-                //                 // ->orderBy('followee')
-                //                 // ->simplePaginate();
-                //             }
-                //         ])->find(auth()->user()->id);
-                // } else
-                if ($filter3) {
-                    // dd($filter2);
-                    $users = auth()->user()
-                        ->following()
-                        ->withCount('following')
-                        ->withCount('followers')
-                        ->with([
-                            'blockers' => function ($query) {
-                                $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'favoritee' => function ($query) {
-                                $query->select('userId')->where('userId', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->where('profileType', $filter3)
-                        ->orderBy('id')
-                        ->simplePaginate();
-                }
-                elseif ($filter2 == 'model') {
-                    // dd($filter2);
-                    $users = auth()->user()
-                        ->following()
-                        ->withCount('following')
-                        ->withCount('followers')
-                        ->with([
-                            'blockers' => function ($query) {
-                                $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'favoritee' => function ($query) {
-                                $query->select('userId')->where('userId', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->where('isModel', '1')
-                        ->orderBy('id')
-                        ->simplePaginate();
-                }elseif ($filter2 == 'online') {
-                    // dd($filter2);
-                    $users = auth()->user()
-                        ->following()
-                        ->withCount('following')
-                        ->withCount('followers')
-                        ->with([
-                            'blockers' => function ($query) {
-                                $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'favoritee' => function ($query) {
-                                $query->select('userId')->where('userId', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->where('isOnline', '1')
-                        ->orderBy('id')
-                        ->simplePaginate();
-                } elseif ($filter2 == 'popular') {
-                    $users = User::find(auth()->user()->id)
-                        ->following()
-                        ->withCount('following')
-                        ->withCount('followers')
-                        ->with([
-                            'blockers' => function ($query) {
-                                $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'favoritee' => function ($query) {
-                                $query->select('userId')->where('userId', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->having('followers_count', '>', 10)
-                        ->orderBy('id')
-                        ->simplePaginate();
-                } elseif ($filter2 == 'new') {
-                    $users = auth()->user()
-                        ->following()
-                        ->withCount('following')
-                        ->withCount('followers')
-                        ->with([
-                            'blockers' => function ($query) {
-                                $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'favoritee' => function ($query) {
-                                $query->select('userId')->where('userId', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->whereDate('users.created_at', '=', now())
-                        ->orderBy('id')
-                        ->simplePaginate();
-                } elseif ($filter2 == 'nearby') {
-                    $users = User::select('id', 'name', 'imageUrl')
-                        ->with([
-                            'following' => function ($query) {
-                                $lat = auth()->user()->lat;
-                                $lng = auth()->user()->lng;
-                                $query->select('followee as id', 'name', 'imageUrl', 'location', 'link', 'bio', 'lat', 'lng', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) +
-                            pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
-                                    ->withCount('following')
-                                    ->withCount('followers')
-                                    ->with([
-                                        'favoritee' => function ($query) {
-                                            $query->select('userId')->where('userId', '=', auth()->user()->id);
-                                        }
+                if ($filter3 == 'noFilter') {
+                    if ($filter2 == 'online') {
+                        // dd($filter2);
+                        $users = auth()->user()
+                            ->following()
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->where('isOnline', '1')
+                            ->orderBy('id')
+                            ->simplePaginate();
+                    } elseif ($filter2 == 'popular') {
+                        $users = auth()->user()
+                            ->following()
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            // ->where('users.id','!=', '1')
+                            ->having('followers_count', '>', 10)
+                            ->orderBy('id')
+                            ->simplePaginate();
+                        // $users->data=$users->data;
+                    } elseif ($filter2 == 'new') {
+                        $users = auth()->user()
+                            ->following()
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                                ]) 
+                                ->with([
+                                    'favoritee' => function ($query) {
+                                        $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                    }
                                     ])
-                                    ->with([
-                                        'blockers' => function ($query) {
-                                            $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                                        }
-                                    ])
-                                    ->having('distance', '<', 100);
-                                // ->orderBy('followee')
-                                // ->simplePaginate();
-                            }
-                        ])->find(auth()->user()->id);
-                } else {
-                    $users = auth()->user()
+                            ->where('users.created_at','like', "%".date("Y-m-d")."%")
+                            
+                            ->orderBy('id')
+                            ->simplePaginate();
+                    } elseif ($filter2 == 'nearby') {
+                        $users = User::select('id', 'name', 'imageUrl','profileType','created_at')
+                            ->with([
+                                'following' => function ($query) {
+                                    $lat = auth()->user()->lat;
+                                    $lng = auth()->user()->lng;
+                                    $query->select('followee as id', 'name', 'imageUrl', 'location', 'link', 'bio', 'lat', 'lng','profileType','users.created_at', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) +
+                                    pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
+                                        ->withCount('following')
+                                        ->withCount('followers')
+                                        ->with([
+                                            'favoritee' => function ($query) {
+                                                $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                            }
+                                        ])
+                                        ->with([
+                                            'blockers' => function ($query) {
+                                                $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                            }
+                                        ])
+                                        ->having('distance', '<', 100);
+                                    // ->orderBy('followee')
+                                    // ->simplePaginate();
+                                }
+                            ])->find(auth()->user()->id);
+                        $users['data'] = $users->following;
+                    }else{
+                        $users = auth()->user()
                         ->following()
                         ->withCount('following')
                         ->withCount('followers')
@@ -308,248 +209,331 @@ class SearchController extends Controller
                         ])
                         ->orderBy('id')
                         ->simplePaginate();
+                    }
+                    
+                } else {
+                    if ($filter2 == 'online') {
+                        // dd($filter2);
+                        $users = auth()->user()
+                            ->following()
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->where(['isOnline'=> '1','profileType'=>$filter3])
+                            // ->where('profileType', $filter3)
+                            ->orderBy('id')
+                            ->simplePaginate();
+                    } elseif ($filter2 == 'popular') {
+                        $users = User::find(auth()->user()->id)
+                            ->following()
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->having('followers_count', '>', 10)
+                            ->where('profileType', $filter3)
+                            ->orderBy('id')
+                            ->simplePaginate();
+                    } elseif ($filter2 == 'new') {
+                        $users = auth()->user()
+                            ->following()
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'followers' => function ($query) {
+                                    $query->select('follower')->where('follower', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->whereDate('users.created_at', '=', now())
+                            ->where('profileType', $filter3)
+                            ->orderBy('id')
+                            ->simplePaginate();
+                    } elseif ($filter2 == 'nearby') {
+                        $users = User::select('id', 'name', 'imageUrl','profileType','created_at')
+                            ->with([
+                                'following' => function ($query) {
+                                    $lat = auth()->user()->lat;
+                                    $lng = auth()->user()->lng;
+                                    $query->select('followee as id', 'name', 'imageUrl', 'location', 'link', 'bio', 'lat', 'lng','profileType','users.created_at', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) +
+                                    pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
+                                        ->withCount('following')
+                                        ->withCount('followers')
+                                        ->with([
+                                            'favoritee' => function ($query) {
+                                                $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                            }
+                                        ])
+                                        ->with([
+                                            'blockers' => function ($query) {
+                                                $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                            }
+                                        ])
+                                        ->having('distance', '<', 100)
+                                        ->where('profileType', request()->filter3);
 
+                                    // ->orderBy('followee')
+                                    // ->simplePaginate();
+                                }
+                            ])->find(auth()->user()->id);
+                        $users['data'] = $users->following;
+                    }
                 }
+
+
 
             } else {
-                // if ($filter3 == 'popular') {
-                //     $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio')
-                //         ->withCount('following')
-                //         ->withCount('followers')
-                //         ->with([
-                //             'followers' => function ($query) {
-                //                 $query->select('follower')->where('follower', '=', auth()->user()->id);
-                //             }
-                //         ])
-                //         ->with([
-                //             'favoritee' => function ($query) {
-                //                 $query->select('userId')->where('userId', '=', auth()->user()->id);
-                //             }
-                //         ])
-                //         ->with([
-                //             'blockers' => function ($query) {
-                //                 $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                //             }
-                //         ])
-                //         // ->where('id', '!=', auth()->user()->id)
-                //         ->where('isModel', '1')
-                //         ->having('followers_count', '>', 10)
-                //         ->orderBy('id')
-                //         ->simplePaginate();
-                // } elseif ($filter3 == 'new') {
-                //     $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', )->withCount('following')
-                //         ->withCount('followers')
-                //         ->with([
-                //             'followers' => function ($query) {
-                //                 $query->select('follower')->where('follower', '=', auth()->user()->id);
-                //             }
-                //         ])
-                //         ->with([
-                //             'favoritee' => function ($query) {
-                //                 $query->select('userId')->where('userId', '=', auth()->user()->id);
-                //             }
-                //         ])
-                //         ->with([
-                //             'blockers' => function ($query) {
-                //                 $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                //             }
-                //         ])
-                //         // ->where('id', '!=', auth()->user()->id)
-                //         ->where('isModel', '1')
-                //         ->whereDate('created_at', '=', now())
-                //         ->orderBy('id')
-                //         ->simplePaginate();
-                // } elseif ($filter3 == 'nearby') {
-                //     $lat = auth()->user()->lat;
-                //     $lng = auth()->user()->lng;
-                //     $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'lat', 'lng', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) +
-                //     pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
-                //         ->withCount('following')
-                //         ->withCount('followers')
-                //         ->with([
-                //             'followers' => function ($query) {
-                //                 $query->select('follower')->where('follower', '=', auth()->user()->id);
-                //             }
-                //         ])
-                //         ->with([
-                //             'favoritee' => function ($query) {
-                //                 $query->select('userId')->where('userId', '=', auth()->user()->id);
-                //             }
-                //         ])
-                //         ->with([
-                //             'blockers' => function ($query) {
-                //                 $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                //             }
-                //         ])
-                //         // ->where('id', '!=', auth()->user()->id)
-                //         ->where('isModel', '1')
-                //         ->having('distance', '<', 100)
-                //         ->orderBy('id')
-                //         ->simplePaginate();
-                // } 
-                if ($filter3) {
-                    $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio')
-                        ->withCount('following')
-                        ->withCount('followers')
-                        ->with([
-                            'followers' => function ($query) {
-                                $query->select('follower')->where('follower', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'favoritee' => function ($query) {
-                                $query->select('userId')->where('userId', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'blockers' => function ($query) {
-                                $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                            }
-                        ])
-                        // ->where('id', '!=', auth()->user()->id)
-                        ->where('profileType', $filter3)
-                        ->orderBy('id')
-                        ->simplePaginate();
-                }
-                elseif ($filter2 == 'model') {
-                    $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio')
-                        ->withCount('following')
-                        ->withCount('followers')
-                        ->with([
-                            'followers' => function ($query) {
-                                $query->select('follower')->where('follower', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'favoritee' => function ($query) {
-                                $query->select('userId')->where('userId', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'blockers' => function ($query) {
-                                $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                            }
-                        ])
-                        // ->where('id', '!=', auth()->user()->id)
-                        ->where('isModel', '1')
-                        ->orderBy('id')
-                        ->simplePaginate();
-                } elseif ($filter2 == 'online') {
-                    $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio','isOnline')
-                        ->withCount('following')
-                        ->withCount('followers')
-                        ->with([
-                            'followers' => function ($query) {
-                                $query->select('follower')->where('follower', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'favoritee' => function ($query) {
-                                $query->select('userId')->where('userId', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'blockers' => function ($query) {
-                                $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                            }
-                        ])
-                        // ->where('id', '!=', auth()->user()->id)
-                        ->where('isOnline', '1')
-                        ->orderBy('id')
-                        ->simplePaginate();
-                } elseif ($filter2 == 'popular') {
-                    $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio')->withCount('following')
-                        ->withCount('followers')
-                        ->with([
-                            'followers' => function ($query) {
-                                $query->select('follower')->where('follower', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'favoritee' => function ($query) {
-                                $query->select('userId')->where('userId', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'blockers' => function ($query) {
-                                $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                            }
-                        ])
-                        // ->where('id', '!=', auth()->user()->id)
-                        ->having('followers_count', '>', 10)
-                        ->orderBy('id')
-                        ->simplePaginate();
-                } elseif ($filter2 == 'new') {
-                    $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio')->withCount('following')
-                        ->withCount('followers')
-                        ->with([
-                            'followers' => function ($query) {
-                                $query->select('follower')->where('follower', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'favoritee' => function ($query) {
-                                $query->select('userId')->where('userId', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'blockers' => function ($query) {
-                                $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                            }
-                        ])
-                        // ->where('id', '!=', auth()->user()->id)
-                        ->whereDate('created_at', '=', now())
-                        ->orderBy('id')
-                        ->simplePaginate();
-                } elseif ($filter2 == 'nearby') {
-                    $lat = auth()->user()->lat;
-                    $lng = auth()->user()->lng;
-                    $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'lat', 'lng', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) +
-                    pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
-                        ->withCount('following')
-                        ->withCount('followers')
-                        ->with([
-                            'followers' => function ($query) {
-                                $query->select('follower')->where('follower', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'favoritee' => function ($query) {
-                                $query->select('userId')->where('userId', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'blockers' => function ($query) {
-                                $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                            }
-                        ])
-                        // ->where('id', '!=', auth()->user()->id)
-                        ->having('distance', '<', 100)
-                        ->orderBy('id')
-                        ->simplePaginate();
+
+                if ($filter3 == 'noFilter') {
+                    if ($filter2 == 'online') {
+                        $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'isOnline', 'profileType', 'created_at')
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'followers' => function ($query) {
+                                    $query->select('follower')->where('follower', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                            ])
+                            // ->where('id', '!=', auth()->user()->id)
+                            ->where('isOnline', '1')
+                            ->orderBy('id')
+                            ->simplePaginate();
+                    } elseif ($filter2 == 'popular') {
+                        $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'profileType', 'created_at')
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'followers' => function ($query) {
+                                    $query->select('follower')->where('follower', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                            ])
+                            // ->where('id', '!=', auth()->user()->id)
+                            ->having('followers_count', '>', 10)
+                            ->orderBy('id')
+                            ->simplePaginate();
+                    } elseif ($filter2 == 'new') {
+                        $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'profileType', 'created_at')
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'followers' => function ($query) {
+                                    $query->select('follower')->where('follower', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                            ])
+                            // ->where('id', '!=', auth()->user()->id)
+                            ->whereDate('created_at', '=', now())
+                            ->orderBy('id')
+                            ->simplePaginate();
+                    } elseif ($filter2 == 'nearby') {
+                        $lat = auth()->user()->lat;
+                        $lng = auth()->user()->lng;
+                        $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'lat', 'lng', 'profileType', 'created_at', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) +
+                        pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'followers' => function ($query) {
+                                    $query->select('follower')->where('follower', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                            ])
+                            // ->where('id', '!=', auth()->user()->id)
+                            ->having('distance', '<', 100)
+                            ->orderBy('id')
+                            ->simplePaginate();
+                    }else {
+                        $users = User::select('id', 'name', 'imageUrl', 'location', 'isModel', 'link', 'bio','isOnline','profileType','created_at')
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'followers' => function ($query) {
+                                    $query->select('follower')->where('follower', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                            ])
+                            // ->where('id', '!=', auth()->user()->id)
+                            ->orderBy('id')
+                            ->simplePaginate();
+                    }
+                    
                 } else {
-                    $users = User::select('id', 'name', 'imageUrl', 'location', 'isModel', 'link', 'bio')
-                        ->withCount('following')
-                        ->withCount('followers')
-                        ->with([
-                            'followers' => function ($query) {
-                                $query->select('follower')->where('follower', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'favoritee' => function ($query) {
-                                $query->select('userId')->where('userId', '=', auth()->user()->id);
-                            }
-                        ])
-                        ->with([
-                            'blockers' => function ($query) {
-                                $query->select('blocker')->where('blocker', '=', auth()->user()->id);
-                            }
-                        ])
-                        // ->where('id', '!=', auth()->user()->id)
-                        ->orderBy('id')
-                        ->simplePaginate();
+                    if ($filter2 == 'online') {
+                        $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'isOnline', 'profileType', 'created_at')
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'followers' => function ($query) {
+                                    $query->select('follower')->where('follower', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                            ])
+                            // ->where('id', '!=', auth()->user()->id)
+                            ->where(['isOnline'=> '1','profileType'=>$filter3])
+                            // ->where('profileType', $filter3)
+                            ->orderBy('id')
+                            ->simplePaginate();
+                    } elseif ($filter2 == 'popular') {
+                        $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'profileType', 'created_at')
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'followers' => function ($query) {
+                                    $query->select('follower')->where('follower', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                            ])
+                            // ->where('id', '!=', auth()->user()->id)
+                            ->having('followers_count', '>', 10)
+                            ->where('profileType', $filter3)
+                            ->orderBy('id')
+                            ->simplePaginate();
+                    } elseif ($filter2 == 'new') {
+                        $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'profileType', 'created_at')
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'followers' => function ($query) {
+                                    $query->select('follower')->where('follower', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                            ])
+                            // ->where('id', '!=', auth()->user()->id)
+                            ->whereDate('created_at', '=', now())
+                            ->where('profileType', $filter3)
+                            ->orderBy('id')
+                            ->simplePaginate();
+                    } elseif ($filter2 == 'nearby') {
+                        $lat = auth()->user()->lat;
+                        $lng = auth()->user()->lng;
+                        $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'lat', 'lng', 'profileType', 'created_at', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) +
+                        pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'followers' => function ($query) {
+                                    $query->select('follower')->where('follower', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                            ])
+                            // ->where('id', '!=', auth()->user()->id)
+                            ->having('distance', '<', 100)
+                            ->where('profileType', $filter3)
+                            ->orderBy('id')
+                            ->simplePaginate();
+                    }
                 }
+
+
 
             }
 
@@ -561,12 +545,17 @@ class SearchController extends Controller
                 return response()->json([
                     'filters' => [$filter1, $filter2, $filter3],
                     'result' => $users,
-                    'status' => true
+                    'results' => true,
+                    'status' => true, 
                 ]);
             } else {
+                // $obj = new stdClass() ;
+                // $obj->data = $users;
                 return response()->json([
                     'filters' => [$filter1, $filter2, $filter3],
-                    'result' => 'no results',
+                    'result' => $users,
+                    'msg' => 'no results',
+                    'results' => false,
                     'status' => true
                 ]);
             }

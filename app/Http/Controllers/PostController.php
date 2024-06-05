@@ -142,7 +142,16 @@ class PostController extends Controller
     public function deletePost(Post $post)
     {
         try {
+            $channel = StatusChannel::find($post->channelId);
             $post->delete();
+            $lastPost = $channel->posts()->orderBy('id','desc')->first();
+            if($lastPost){
+                $channel->lastPostId= $lastPost->id;
+                $channel->save();
+            }else{
+                $channel->lastPostId= 0;
+                $channel->save();
+            }
             // ChannelUpdatesEvent::dispatch($post);
             return response()->json([
                 'msg' => 'post deleted',
@@ -168,8 +177,8 @@ class PostController extends Controller
                 }])
                 ->withCount('likes')
                 ->withCount('views')
-                // ->orderBy('id', 'desc')
-                ->simplePaginate(50),
+                ->orderBy('id', 'desc')
+                ->simplePaginate(10),
             'status' => true
         ]);
     }

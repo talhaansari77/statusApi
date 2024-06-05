@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\TypingEvent;
-use App\Jobs\NotificationJob;
+use App\Events\NewTypingEvent;
+use stdClass;
 use App\Models\Message;
+// use App\Events\TypingEvent;
 use App\Models\Conversation;
-use App\Models\MessageAttachment;
 use Illuminate\Http\Request;
+use App\Jobs\NotificationJob;
 use App\Events\SendMessageEvent;
+use App\Models\MessageAttachment;
 use Illuminate\Support\Facades\DB;
 
 function sendMsg(Request $request, $convo)
@@ -134,7 +136,7 @@ class MessageController extends Controller
             ])
             ->with([
                 'user1' => function ($query) {
-                    $query->select('id', 'name', 'imageUrl','isOnline')
+                    $query->select('id', 'name', 'imageUrl', 'isOnline')
                         ->with([
                             'favoritee' => function ($query) {
                                 $query->select('userId')->where('userId', '=', auth()->user()->id);
@@ -146,7 +148,7 @@ class MessageController extends Controller
             ])
             ->with([
                 'user2' => function ($query) {
-                    $query->select('id', 'name', 'imageUrl','isOnline')
+                    $query->select('id', 'name', 'imageUrl', 'isOnline')
                         ->with([
                             'favoritee' => function ($query) {
                                 $query->select('userId')->where('userId', '=', auth()->user()->id);
@@ -177,8 +179,8 @@ class MessageController extends Controller
                 }
             ])
             ->with('attachments')
-            // ->orderBy('created_at','desc')
-            ->simplePaginate(50);
+            ->orderBy('created_at','desc')
+            ->simplePaginate(10);
 
         return response()->json([
             "conversation" => $conversation,
@@ -302,16 +304,19 @@ class MessageController extends Controller
      * Show the form for creating a new resource.
      */
 
-     public function startTypingChannel(Request $request){
-        $id1=intval($request->user1Id);
-        $id2=intval($request->user2Id);
-        TypingEvent::dispatch(['user1Id'=> $id1,'user2Id'=> $id2]);
+    public function startTypingChannel(Request $request)
+    {
+        $data = $request->validate([
+            'user1Id' => 'required|integer',
+            'user2Id' => 'required|integer',
+        ]);
+        NewTypingEvent::dispatch($data);
         return response()->json([
-            'status'=> true,
-            'channel'=> 'TypingChannel'.$id1 +$id2,
-            ]);
+            'status' => true,
+            'channel' => 'TypingChannel_' . $data['user1Id'] + $data['user2Id'],
+        ]);
 
-     }
+    }
     public function create()
     {
         //
