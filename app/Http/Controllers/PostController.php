@@ -175,6 +175,7 @@ class PostController extends Controller
                 ->with(['likes'=>function($query){
                     $query->select('*')->where('user_id', auth()->user()->id);
                 }])
+                ->with('author')
                 ->withCount('likes')
                 ->withCount('views')
                 ->orderBy('id', 'desc')

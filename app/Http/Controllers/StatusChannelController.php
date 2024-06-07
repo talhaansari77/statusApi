@@ -38,7 +38,14 @@ class StatusChannelController extends Controller
                                 }
                             ]);
                     }
-                ])->withCount('following');
+                ])
+                ->withCount([
+                    'blockers' => function ($query) {
+                        $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                    }
+                ])
+                ->withCount('following')
+                ->havingNull('blockers_count');
             }
         ])
             ->find($user->id);
@@ -64,7 +71,13 @@ class StatusChannelController extends Controller
                         $query->select('*')->with('lastPost');
                     }
                 ])
-                    ->withCount('following');
+                ->withCount([
+                    'blockers' => function ($query) {
+                        $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                    }
+                ])
+                ->withCount('following')
+                ->havingNull('blockers_count');
             }
         ])
             ->find($user->id);

@@ -112,7 +112,13 @@ class CommentsController extends Controller
     public function getUserComment(Request $request)
     {
         try {
-            $comments = User::find($request->userId)->comments();
+            // $comments = User::find($request->userId)->comments();
+            $comments = User::where(['id'=>$request->userId,'wallComments'=>1])
+            ->first()
+            ->comments()
+            ->with(['commentator'=>function($query){
+                $query->select('id','name','imageUrl');
+            }]);
 
             return response()->json([
                 'comments' => $comments->simplePaginate(10),

@@ -21,6 +21,10 @@ class Comment extends Model
     {
         return $this->belongsTo(User::class, 'userId');
     }
+    public function commentator()
+    {
+        return $this->belongsTo(User::class, 'commentatorId');
+    }
 
     protected $hidden = [
         // 'commentatorId',

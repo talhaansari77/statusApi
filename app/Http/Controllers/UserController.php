@@ -106,6 +106,8 @@ class UserController extends Controller
                     'email' => 'required|email|unique:users',
                     'password' => 'required|min:6',
                     'deviceId' => [Rule::excludeIf(!strlen(request()->deviceId)),'string'],
+                ],[
+                    'email.unique' => 'Email in use'
                 ]);
 
 
