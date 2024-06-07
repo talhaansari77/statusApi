@@ -54,11 +54,12 @@ class SearchController extends Controller
                         $query->select('follower')->where('follower', '=', auth()->user()->id);
                     }
                 ])
-                ->with([
+                ->withCount([
                     'blockers' => function ($query) {
                         $query->select('blocker')->where('blocker', '=', auth()->user()->id);
                     }
                 ])
+                ->havingNull('blockers_count')
                 ->where('name', 'like', "%" . $request->search . "%")
                 // ->where('id', '!=', auth()->user()->id)
                 ->orderBy('id')
