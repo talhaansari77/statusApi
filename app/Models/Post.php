@@ -17,6 +17,7 @@ class Post extends Model
         // 'likes',
         'channelId',
         'User_id',
+        'read_at',
     ];
 
     public function channel()

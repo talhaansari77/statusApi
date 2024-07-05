@@ -62,7 +62,7 @@ class SearchController extends Controller
                 ->havingNull('blockers_count')
                 ->where('name', 'like', "%" . $request->search . "%")
                 // ->where('id', '!=', auth()->user()->id)
-                ->orderBy('id')
+                ->orderBy('name')
                 ->simplePaginate();
 
             if ($users->count()) {
@@ -122,7 +122,7 @@ class SearchController extends Controller
                             ])
                             ->havingNull('blockers_count')
                             ->where('isOnline', '1')
-                            ->orderBy('id')
+                            ->orderBy('name')
                             ->simplePaginate();
                     } elseif ($filter2 == 'popular') {
                         $users = auth()->user()
@@ -141,9 +141,9 @@ class SearchController extends Controller
                             ])
                             // ->where('users.id','!=', '1')
                             ->havingNull('blockers_count')
-                            ->having('followers_count', '>', 10)
+                            // ->having('followers_count', '>', 10)
                             
-                            ->orderBy('id')
+                            ->orderBy('followers_count','desc')
                             ->simplePaginate();
                         // $users->data=$users->data;
                     } elseif ($filter2 == 'new') {
@@ -162,9 +162,9 @@ class SearchController extends Controller
                                     }
                                     ])
                             ->havingNull('blockers_count')
-                            ->where('users.created_at','like', "%".date("Y-m-d")."%")
+                            // ->where('users.created_at','like', "%".date("Y-m-d")."%")
                             
-                            ->orderBy('id')
+                            ->orderBy('created_at','desc')
                             ->simplePaginate();
                     } elseif ($filter2 == 'nearby') {
                         $users = User::select('id', 'name', 'imageUrl','profileType','created_at')
@@ -214,7 +214,7 @@ class SearchController extends Controller
                             }
                         ])
                         ->havingNull('blockers_count')
-                        ->orderBy('id')
+                        ->orderBy('name')
                         ->simplePaginate();
                     }
                     
@@ -238,7 +238,7 @@ class SearchController extends Controller
                             ->havingNull('blockers_count')
                             ->where(['isOnline'=> '1','profileType'=>$filter3])
                             // ->where('profileType', $filter3)
-                            ->orderBy('id')
+                            ->orderBy('name')
                             ->simplePaginate();
                     } elseif ($filter2 == 'popular') {
                         $users = User::find(auth()->user()->id)
@@ -256,9 +256,9 @@ class SearchController extends Controller
                                 }
                             ])
                             ->havingNull('blockers_count')
-                            ->having('followers_count', '>', 10)
+                            // ->having('followers_count', '>', 10)
                             ->where('profileType', $filter3)
-                            ->orderBy('id')
+                            ->orderBy('followers_count','desc')
                             ->simplePaginate();
                     } elseif ($filter2 == 'new') {
                         $users = auth()->user()
@@ -281,9 +281,9 @@ class SearchController extends Controller
                                 }
                             ])
                             ->havingNull('blockers_count')
-                            ->whereDate('users.created_at', '=', now())
+                            // ->whereDate('users.created_at', '=', now())
                             ->where('profileType', $filter3)
-                            ->orderBy('id')
+                            ->orderBy('created_at','desc')
                             ->simplePaginate();
                     } elseif ($filter2 == 'nearby') {
                         $users = User::select('id', 'name', 'imageUrl','profileType','created_at')
@@ -314,6 +314,30 @@ class SearchController extends Controller
                                 }
                             ])->find(auth()->user()->id);
                         $users['data'] = $users->following;
+                    }else{
+                        $users = auth()->user()
+                        ->following()
+                        ->withCount('following')
+                        ->withCount('followers')
+                        ->with([
+                            'followers' => function ($query) {
+                                $query->select('follower')->where('follower', '=', auth()->user()->id);
+                            }
+                        ])
+                        ->withCount([
+                            'blockers' => function ($query) {
+                                $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                            }
+                        ])
+                        ->with([
+                            'favoritee' => function ($query) {
+                                $query->select('userId')->where('userId', '=', auth()->user()->id);
+                            }
+                        ])
+                        ->havingNull('blockers_count')
+                        ->where('profileType', $filter3)
+                        ->orderBy('name')
+                        ->simplePaginate();
                     }
                 }
 
@@ -344,7 +368,7 @@ class SearchController extends Controller
                             // ->where('id', '!=', auth()->user()->id)
                             ->havingNull('blockers_count')
                             ->where('isOnline', '1')
-                            ->orderBy('id')
+                            ->orderBy('name')
                             ->simplePaginate();
                     } elseif ($filter2 == 'popular') {
                         $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'profileType', 'created_at')
@@ -367,8 +391,8 @@ class SearchController extends Controller
                             ])
                             ->havingNull('blockers_count')
                             // ->where('id', '!=', auth()->user()->id)
-                            ->having('followers_count', '>', 10)
-                            ->orderBy('id')
+                            // ->having('followers_count', '>', 10)
+                            ->orderBy('followers_count','desc')
                             ->simplePaginate();
                     } elseif ($filter2 == 'new') {
                         $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'profileType', 'created_at')
@@ -391,8 +415,8 @@ class SearchController extends Controller
                             ])
                             ->havingNull('blockers_count')
                             // ->where('id', '!=', auth()->user()->id)
-                            ->whereDate('created_at', '=', now())
-                            ->orderBy('id')
+                            // ->whereDate('created_at', '=', now())
+                            ->orderBy('created_at','desc')
                             ->simplePaginate();
                     } elseif ($filter2 == 'nearby') {
                         $lat = auth()->user()->lat;
@@ -419,7 +443,7 @@ class SearchController extends Controller
                             ->havingNull('blockers_count')
                             // ->where('id', '!=', auth()->user()->id)
                             ->having('distance', '<', 100)
-                            ->orderBy('id')
+                            ->orderBy('name')
                             ->simplePaginate();
                     }else {
                         $users = User::select('id', 'name', 'imageUrl', 'location', 'isModel', 'link', 'bio','isOnline','profileType','created_at')
@@ -442,7 +466,7 @@ class SearchController extends Controller
                             ])
                             ->havingNull('blockers_count')
                             // ->where('id', '!=', auth()->user()->id)
-                            ->orderBy('id')
+                            ->orderBy('name')
                             ->simplePaginate();
                     }
                     
@@ -470,7 +494,7 @@ class SearchController extends Controller
                             // ->where('id', '!=', auth()->user()->id)
                             ->where(['isOnline'=> '1','profileType'=>$filter3])
                             // ->where('profileType', $filter3)
-                            ->orderBy('id')
+                            ->orderBy('name')
                             ->simplePaginate();
                     } elseif ($filter2 == 'popular') {
                         $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'profileType', 'created_at')
@@ -493,9 +517,9 @@ class SearchController extends Controller
                             ])
                             ->havingNull('blockers_count')
                             // ->where('id', '!=', auth()->user()->id)
-                            ->having('followers_count', '>', 10)
+                            // ->having('followers_count', '>', 10)
                             ->where('profileType', $filter3)
-                            ->orderBy('id')
+                            ->orderBy('followers_count','desc')
                             ->simplePaginate();
                     } elseif ($filter2 == 'new') {
                         $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'profileType', 'created_at')
@@ -518,9 +542,9 @@ class SearchController extends Controller
                             ])
                             ->havingNull('blockers_count')
                             // ->where('id', '!=', auth()->user()->id)
-                            ->whereDate('created_at', '=', now())
+                            // ->whereDate('created_at', '=', now())
                             ->where('profileType', $filter3)
-                            ->orderBy('id')
+                            ->orderBy('created_at','desc')
                             ->simplePaginate();
                     } elseif ($filter2 == 'nearby') {
                         $lat = auth()->user()->lat;
@@ -548,7 +572,31 @@ class SearchController extends Controller
                             // ->where('id', '!=', auth()->user()->id)
                             ->having('distance', '<', 100)
                             ->where('profileType', $filter3)
-                            ->orderBy('id')
+                            ->orderBy('name')
+                            ->simplePaginate();
+                    }else {
+                        $users = User::select('id', 'name', 'imageUrl', 'location', 'isModel', 'link', 'bio','isOnline','profileType','created_at')
+                            ->withCount('following')
+                            ->withCount('followers')
+                            ->with([
+                                'followers' => function ($query) {
+                                    $query->select('follower')->where('follower', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->with([
+                                'favoritee' => function ($query) {
+                                    $query->select('userId')->where('userId', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->withCount([
+                                'blockers' => function ($query) {
+                                    $query->select('blocker')->where('blocker', '=', auth()->user()->id);
+                                }
+                            ])
+                            ->havingNull('blockers_count')
+                            ->where('profileType', $filter3)
+                            // ->where('id', '!=', auth()->user()->id)
+                            ->orderBy('name')
                             ->simplePaginate();
                     }
                 }

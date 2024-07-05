@@ -16,7 +16,10 @@ class ArchiveController extends Controller
     public function createArchive(Request $request)
     {
         try {
-            $arc = Archive::where('userId', '=', $request->userId)->first();
+            $arc = Archive::where([
+                'userId'=> $request->userId,
+                'conversationId'=>$request->conversationId
+            ])->first();
             if ($arc) {
                 $arc->delete();
                 return response()->json([
@@ -104,7 +107,10 @@ class ArchiveController extends Controller
     public function createFavoriteConversation(Request $request)
     {
         try {
-            $fav = FavoriteConversation::where('userId', '=', $request->userId)->first();
+            $fav = FavoriteConversation::where([
+                'userId'=> $request->userId,
+                'conversationId'=>$request->conversationId
+            ])->first();
             if ($fav) {
                 $fav->delete();
                 return response()->json([

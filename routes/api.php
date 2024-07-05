@@ -70,6 +70,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(static function () {
     Route::post("/addRemoveViews", [PostController::class, "addRemoveViews"]);
     Route::post("/updatePost", [PostController::class, "updatePost"]);
     Route::post("/deletePost/{post}", [PostController::class, "deletePost"]);
+    Route::post("/readPost/{post}", [PostController::class, "readPost"]);
+    Route::post("/isViewed", [PostController::class, "isViewed"]);
+
     //channel controller
     Route::post("/getChannel", [StatusChannelController::class, "getChannel"]);
     Route::post("/getFollowingChannel", [StatusChannelController::class, "getFollowingChannel"]);

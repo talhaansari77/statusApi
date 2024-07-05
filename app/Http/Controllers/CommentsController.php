@@ -114,14 +114,20 @@ class CommentsController extends Controller
         try {
             // $comments = User::find($request->userId)->comments();
             $comments = User::where(['id'=>$request->userId,'wallComments'=>1])
-            ->first()
-            ->comments()
-            ->with(['commentator'=>function($query){
-                $query->select('id','name','imageUrl');
-            }]);
+            ->first();
+            if($comments){
+                $comments=$comments->comments()
+                ->with(['commentator'=>function($query){
+                    $query->select('id','name','imageUrl');
+                }])->simplePaginate(10);
+            }else{
+                $obj = new stdClass();
+                $obj->data=array();
+                $comments=$obj;
+            }
 
             return response()->json([
-                'comments' => $comments->simplePaginate(10),
+                'comments' => $comments,
                 'status' => true
             ]);
         } catch (\Throwable $th) {

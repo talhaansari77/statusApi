@@ -14,13 +14,14 @@ return new class extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
             $table->string('title')->default('');
-            $table->string('description')->nullable();
+            $table->longText('description')->nullable();
             $table->longText('imageUrl')->default('');
             $table->longText('gif')->default('');
             $table->bigInteger('views')->default(0);
             $table->bigInteger('likes')->default(0);
+            $table->timestamp('read_at')->nullable();
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
-            
+
             $table->bigInteger('channelId')->unsigned();
             $table->foreign('channelId')->references('id')->on('status_channels')->onDelete("cascade");
             $table->timestamps();

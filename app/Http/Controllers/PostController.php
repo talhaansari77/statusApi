@@ -44,6 +44,33 @@ class PostController extends Controller
         }
     }
 
+    public function isViewed(Request $request)
+    {
+        try {
+            $viewed = View::
+                where(['user_id' =>auth()->user()->id, 'post_id' => $request->post_id])
+                ->first();
+            if ($viewed) {
+                // $liked->delete();
+                return response()->json([
+                    'msg' => 'viewed already',
+                    'status' => true
+                ]);
+            } else {
+                // $viewed = View::create($request->all());
+                return response()->json([
+                    'msg' => 'not viewed yet',
+                    'status' => false
+                ]);
+            }
+
+        } catch (\Throwable $th) {
+            return response()->json([
+                'msg' => $th->getMessage(),
+                'status' => false
+            ]);
+        }
+    }
     public function addRemoveViews(Request $request)
     {
         try {
@@ -109,6 +136,9 @@ class PostController extends Controller
             // }
             if (isset($request->description)) {
                 $post->description = $request->description;
+            }
+            if (isset($request->gif)) {
+                $post->gif = $request->gif;
             }
             if ($request->hasFile('imageUrl')) {
                 //! Using the Storage facade
@@ -182,6 +212,27 @@ class PostController extends Controller
                 ->simplePaginate(10),
             'status' => true
         ]);
+    }
+
+    public function readPost(Post $post)
+    {
+        try {
+            $post->read_at = now();
+            $post->save();
+            return response()->json([
+                "message" => 'success',
+                "status" => true,
+            ]);
+        } catch (\Throwable $th) {
+            $post->read_at = now();
+            $post->save();
+            return response()->json([
+                "message" => $th->getMessage(),
+                "status" => false,
+            ]);
+        }
+
+
     }
 
     /**

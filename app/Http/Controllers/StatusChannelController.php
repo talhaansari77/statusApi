@@ -19,6 +19,11 @@ class StatusChannelController extends Controller
             'channel' => $channel,
         ]);
     }
+    function sorting($a,$b) 
+    { 
+        if ($a->channel->id==$b->channel->id) return 0; 
+            return ($a->channel->id<$b->channel->id)?-1:1; 
+    } 
     public function getFollowingChannel()
     {
         $user = auth()->user();
@@ -48,7 +53,8 @@ class StatusChannelController extends Controller
                 ->havingNull('blockers_count');
             }
         ])
-            ->find($user->id);
+        ->find($user->id);
+        
 
         // uksort($arr, "my_sort");
         // ->where('id', $user->id)
@@ -56,6 +62,7 @@ class StatusChannelController extends Controller
         // $channel = User::find($user->id)->get(['id','name']);
         // $channel = auth()->user()->channel()->with('posts')->get();
         return response()->json([
+            "sort" => uasort($channel->following,"sorting"),
             "status" => true,
             'channel' => $channel,
         ]);

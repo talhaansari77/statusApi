@@ -228,6 +228,8 @@ class UserController extends Controller
                 $user = User::where('email', request()->email)->first();
                 if ($user->email_verified_at) {
                     $token = $user->createToken($user->email)->plainTextToken;
+                    $user->deviceId=request()->deviceId;
+                    $user->save();
                     // dd($token);
 
                     return response()->json([
@@ -284,12 +286,14 @@ class UserController extends Controller
                 $user->save();
 
                 $owner=User::where('email', 'shamrockfilms@gmail.com')->first();
-                $following=Following::where(['followee'=> $owner->id,'follower'=> $user->id])->first();
-                if(!$following){
-                    Following::create([
-                        'followee'=> $owner->id,
-                        'follower'=> $user->id,
-                    ]);
+                if($owner){
+                    $following=Following::where(['followee'=> $owner->id,'follower'=> $user->id])->first();
+                    if(!$following){
+                        Following::create([
+                            'followee'=> $owner->id,
+                            'follower'=> $user->id,
+                        ]);
+                    }
                 }
                 return response()->json([
                     'msg' => 'you are verified',

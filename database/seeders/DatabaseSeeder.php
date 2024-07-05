@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
             // 'imageUrl' => 'https://media.sproutsocial.com/uploads/2022/06/profile-picture.jpeg',
             'imageUrl' => 'https://picsum.photos/id/' . rand(1, 500) . '/300/500',
             'wallpaperUrl' => 'https://picsum.photos/id/' . rand(1, 500) . '/500/300/?blur',
-            'password' => Hash::make('umairabbas'),
+            'password' => Hash::make('password'),
             'lat' => '82.012535',
             'lng' => '-27.104958',
             'isModel' => '1',

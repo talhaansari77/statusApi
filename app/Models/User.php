@@ -84,6 +84,10 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(User::class, 'block_lists', 'block_lists.blocker', 'block_lists.blocked');
     }
+    public function conversations()
+    {
+        return $this->belongsToMany(User::class, 'conversations', 'conversations.userId1', 'conversations.userId2');
+    }
     public function posts()
     {
         return $this->hasMany(Post::class);

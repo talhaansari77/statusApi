@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Conversation;
+use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -107,6 +109,11 @@ class UserSettings extends Controller
     public function deleteUser()
     {
         try {
+            $con = Conversation::where('userId1',request()->id)
+            ->orWhere('userId2',request()->id)->first();
+            Message::where("conversationId", $con->id)->delete();
+            $con->delete();
+
             $user = User::
                 with('favorites')
                 ->with('favoritee')
@@ -117,6 +124,7 @@ class UserSettings extends Controller
                 ->with('following')
                 ->with('blockers')
                 ->with('blocked')
+                ->with('posts')
                 ->findOrFail(request()->id)
                 ->delete();
 
@@ -130,6 +138,7 @@ class UserSettings extends Controller
         } catch (\Throwable $th) {
             //throw $th;
             return response()->json([
+                // 'msg' => $th->getMessage(),
                 'msg' => 'User Not Found',
                 'status' => false
             ]);

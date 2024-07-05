@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->longText('message')->default('');
             $table->longText('gif')->default('');
-            $table->foreignId('senderId')->constrained('users');
+            $table->foreignId('senderId')->constrained('users')->onDelete('cascade');
             $table->foreignId('receiverId')->nullable()->constrained('users');
-            $table->foreignId('conversationId')->nullable()->constrained('conversations');
+            $table->foreignId('conversationId')->nullable()->constrained('conversations')->onDelete('cascade');
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
