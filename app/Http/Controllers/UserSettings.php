@@ -111,8 +111,10 @@ class UserSettings extends Controller
         try {
             $con = Conversation::where('userId1',request()->id)
             ->orWhere('userId2',request()->id)->first();
-            Message::where("conversationId", $con->id)->delete();
-            $con->delete();
+            if($con){
+                Message::where("conversationId", $con->id)->delete();
+                $con->delete();
+            }
 
             $user = User::
                 with('favorites')
@@ -125,7 +127,7 @@ class UserSettings extends Controller
                 ->with('blockers')
                 ->with('blocked')
                 ->with('posts')
-                ->findOrFail(request()->id)
+                ->find(request()->id)
                 ->delete();
 
             return response()->json([
@@ -138,7 +140,8 @@ class UserSettings extends Controller
         } catch (\Throwable $th) {
             //throw $th;
             return response()->json([
-                // 'msg' => $th->getMessage(),
+                // 'msg1' => $th->getMessage(),
+                // 'msg2' => User::find(request()->id),
                 'msg' => 'User Not Found',
                 'status' => false
             ]);
