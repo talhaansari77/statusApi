@@ -392,7 +392,7 @@ class UserController extends Controller
 
                 // $emailData['url']=$url;
                 $emailData['email'] = $request->email;
-                $emailData['title'] = 'Password Reset Code is'.$token;
+                $emailData['title'] = 'Password Reset Code is '.$token;
                 // $emailData['body']='Click the link below to reset your password';
                 $emailData['token'] = $token;
                 // Mail::send('emails.forgetPassword',['data'=>$emailData],function($msg) use ($emailData){
