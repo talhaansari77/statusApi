@@ -44,6 +44,10 @@ class User extends Authenticatable
         'channelId',
         'isOnline',
         'profileType',
+        'interestTags',
+        'showAge',
+        'orientation',
+        'relationshipStatus',
     ];
 
     public function settings()

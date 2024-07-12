@@ -106,6 +106,9 @@ class UserController extends Controller
                     'email' => 'required|email|unique:users',
                     'password' => 'required|min:6',
                     'deviceId' => [Rule::excludeIf(!strlen(request()->deviceId)),'string'],
+                    'name' => [Rule::excludeIf(!strlen(request()->name)),'string'],
+                    'birthday' => [Rule::excludeIf(!strlen(request()->birthday)),'string'],
+                    'interestTags' => [Rule::excludeIf(!strlen(request()->interestTags)),'string'],
                 ],[
                     'email.unique' => 'Email in use'
                 ]);
@@ -114,10 +117,13 @@ class UserController extends Controller
                 // $otp = rand(10, 100.. '2024');
                 $otp = generateOTP(request('email'), now());
                 $user = User::create([
-                    // 'name' => request('name'),
+                    'imageUrl' => 'https://giantcorp.us/storage/placeholder.png',
                     'email' => request('email'),
                     'password' => bcrypt(request('password')),
                     'deviceId' => request()->deviceId,
+                    'name' => request()->name,
+                    'birthday' => request()->birthday,
+                    'interestTags' => request()->interestTags,
                     'otp' => $otp
                 ]);
                 // dd(['userId'=>$user->id]);
@@ -321,10 +327,14 @@ class UserController extends Controller
                 'lng' => [Rule::excludeIf(!strlen(request()->lng)),'string'],
                 'isModel' => [Rule::excludeIf(!strlen(request()->isModel)),'boolean'],
                 'gender' => [Rule::excludeIf(!strlen(request()->gender)),'string'],
+                'orientation' => [Rule::excludeIf(!strlen(request()->orientation)),'string'],
+                'relationshipStatus' => [Rule::excludeIf(!strlen(request()->relationshipStatus)),'string'],
                 'profileType' => [Rule::excludeIf(!strlen(request()->profileType)),'string'],
+                'interestTags' => [Rule::excludeIf(!strlen(request()->interestTags)),'string'],
                 'birthday' => [Rule::excludeIf(!strlen(request()->birthday)),'string'],
                 'occupation' => [Rule::excludeIf(!strlen(request()->occupation)),'string'],
                 'wallComments' => [Rule::excludeIf(!strlen(request()->wallComments)),'boolean'],
+                'showAge' => [Rule::excludeIf(!strlen(request()->showAge)),'boolean'],
                 'bio' => [Rule::excludeIf(!strlen(request()->bio)),'string'],
                 'link' => [Rule::excludeIf(!strlen(request()->link)),'string'],
                 'gif1' => [Rule::excludeIf(!strlen(request()->gif1)),'string'],

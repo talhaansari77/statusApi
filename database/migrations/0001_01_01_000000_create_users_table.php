@@ -17,7 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->boolean('isModel')->default(0);
             $table->string('gender')->default('');
+            $table->string('orientation')->default('');
+            $table->string('relationshipStatus')->default('');
             $table->string('profileType')->default('');
+            $table->string('interestTags')->default('');
             $table->string('birthday')->default('');
             $table->string('occupation')->default('');
             $table->longText('bio')->default('');
@@ -32,6 +35,7 @@ return new class extends Migration
             $table->string('gif2')->default('');
             $table->string('deviceId')->default('');
             $table->boolean('wallComments')->default(1);
+            $table->boolean('showAge')->default(1);
             $table->boolean('isActive')->default(0);
             $table->boolean('isOnline')->default(0);
             $table->timestamp('email_verified_at')->nullable();
