@@ -48,6 +48,8 @@ class User extends Authenticatable
         'showAge',
         'orientation',
         'relationshipStatus',
+        'last_seen',
+        
     ];
 
     public function settings()

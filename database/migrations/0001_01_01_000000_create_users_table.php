@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->default('');
+            $table->string('name')->default('');  //set nullable
             $table->string('email')->unique();
             $table->boolean('isModel')->default(0);
             $table->string('gender')->default('');
-            $table->string('orientation')->default('');
-            $table->string('relationshipStatus')->default('');
+            $table->string('orientation')->default('');  //set nullable
+            $table->string('relationshipStatus')->default('');  //set nullable
             $table->string('profileType')->default('');
-            $table->string('interestTags')->default('');
+            $table->string('interestTags')->default('');  //set nullable
             $table->string('birthday')->default('');
             $table->string('occupation')->default('');
             $table->longText('bio')->default('');
@@ -39,6 +39,7 @@ return new class extends Migration
             $table->boolean('isActive')->default(0);
             $table->boolean('isOnline')->default(0);
             $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp('last_seen')->nullable();
             $table->string('password');
             // foreignKey
             // $table->bigInteger('userSettingsId')->unsigned();

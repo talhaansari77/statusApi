@@ -62,7 +62,7 @@ class StatusChannelController extends Controller
         // $channel = User::find($user->id)->get(['id','name']);
         // $channel = auth()->user()->channel()->with('posts')->get();
         return response()->json([
-            "sort" => uasort($channel->following,"sorting"),
+            // "sort" => $channel->following,
             "status" => true,
             'channel' => $channel,
         ]);

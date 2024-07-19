@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 
 function generateOTP($secret, $time, $length = 6)
 {
@@ -63,6 +64,8 @@ class UserController extends Controller
     public function getUserDetail()
     {
         try {
+            $lat = auth()->user()->lat;
+            $lng = auth()->user()->lng;
             $user = User::withCount('following')
                 ->withCount('followers')
                 ->with('comments')
@@ -304,6 +307,7 @@ class UserController extends Controller
                 return response()->json([
                     'msg' => 'you are verified',
                     'token' => $token,
+                    'user' => $user,
                     'status' => true
                 ]);
             }
@@ -342,12 +346,16 @@ class UserController extends Controller
                 'deviceId' => [Rule::excludeIf(!strlen(request()->deviceId)),'string'],
                 'isOnline' => [Rule::excludeIf(!strlen(request()->isOnline)),'boolean'],
             ]);
+            // dd($request['orientation']);
 
             if(request()->deleteWallImage){
                 $request['wallpaperUrl']='';
             }
             if(request()->deleteUserImage){
                 $request['imageUrl']='';
+            }
+            if(request()->last_seen){
+                $request['last_seen']=now();
             }
             // $request['wallpaperUrl']='';
             // $request['imageUrl']='';
@@ -361,6 +369,7 @@ class UserController extends Controller
                 $request['wallpaperUrl'] = 'https://' . $_SERVER['SERVER_NAME'] . '/storage/' . request()->wallpaperUrl->store('wallpaperImages', 'public');
             }
             $user->update($request);
+            // $user->update($request);
             $user = $user->with('settings')
             ->withCount('following')
             ->withCount('followers')
