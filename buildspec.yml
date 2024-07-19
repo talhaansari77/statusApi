@@ -1,6 +1,15 @@
 version: 0.2
 
 phases:
+  build:
+    commands:
+      - ls
+
+artifacts:
+  files:
+    - public/*
+    
+phases:
   install:
     runtime-versions:
       php: 8.3 
