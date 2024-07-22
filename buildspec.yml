@@ -1,13 +1,4 @@
 version: 0.2
-
-phases:
-  build:
-    commands:
-      - ls
-
-artifacts:
-  files:
-    - public/*
     
 phases:
   install:

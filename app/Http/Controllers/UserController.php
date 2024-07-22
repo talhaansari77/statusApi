@@ -61,6 +61,20 @@ class UserController extends Controller
             ]);
         }
     }
+    public function getUserDistance(){
+            $lat = auth()->user()->lat;
+            $lng = auth()->user()->lng;
+            
+            $user = User::select('id', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) + 
+            pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
+            ->find(request()->id);
+
+            return response()->json([
+                'distance' => $user['distance'],
+                // 'channel' => auth()->user()->channel,
+                'status' => true
+            ]);
+    }
     public function getUserDetail()
     {
         try {

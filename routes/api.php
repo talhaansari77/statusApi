@@ -32,6 +32,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(static function () {
     //getAuth
     Route::post("/getAuth", [UserController::class, "getAuth"]);
     Route::post("/getUserDetail", [UserController::class, "getUserDetail"]);
+    Route::post("/getUserDistance", [UserController::class, "getUserDistance"]);
     
     // user Settings
     Route::post("/updateSettings", [UserSettings::class, "updateSettings"]);
