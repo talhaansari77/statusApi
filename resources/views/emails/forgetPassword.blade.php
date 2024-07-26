@@ -9,11 +9,10 @@
 <body>
     
 
-    <h2>Password Reset OTP</h2>
+    <h2>Status Password Reset Code</h2>
     
     {{-- <p>{{$data['body']}}</p> --}}
-    <h3>Don't share the following OTP with anyone.
-        use this OTP to reset your passwrod.</h3>
+    <h3>Use this code to replace your password.</h3>
     
     <h3>{{$data['token']}}</h3>
 

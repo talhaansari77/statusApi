@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Following;
 use App\Models\User;
 use App\Jobs\MailJob;
 use App\Mail\WelcomeMail;
+use App\Models\Following;
 use Illuminate\Support\Str;
 use App\Jobs\ForgetEmailJob;
 use App\Models\UserSettings;
@@ -13,11 +13,12 @@ use Illuminate\Http\Request;
 use App\Models\PasswordReset;
 use App\Models\StatusChannel;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 function generateOTP($secret, $time, $length = 6)
 {
@@ -33,6 +34,18 @@ function generateOTP($secret, $time, $length = 6)
     $code = unpack('N', $truncatedHash)[1] & 0x7FFFFFFF;
     // Return the OTP as a 6-digit code
     return str_pad($code % 1000000, $length, '0', STR_PAD_LEFT);
+}
+function deleteOldImage($oldPath)
+{
+    //You can also check existance of the file in storage.
+    if (!($oldPath == 'https://giantcorp.us/storage/placeholder.png') && $oldPath) {
+
+        $oldPath = explode("storage/", $oldPath)[1];
+        if (Storage::exists($oldPath)) {
+            unlink($oldPath); //delete from storage
+            // Storage::delete($file_path); //Or you can do it as well
+        }
+    }
 }
 class UserController extends Controller
 {
@@ -61,19 +74,20 @@ class UserController extends Controller
             ]);
         }
     }
-    public function getUserDistance(){
-            $lat = auth()->user()->lat;
-            $lng = auth()->user()->lng;
-            
-            $user = User::select('id', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) + 
+    public function getUserDistance()
+    {
+        $lat = auth()->user()->lat;
+        $lng = auth()->user()->lng;
+
+        $user = User::select('id', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) + 
             pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
             ->find(request()->id);
 
-            return response()->json([
-                'distance' => $user['distance'],
-                // 'channel' => auth()->user()->channel,
-                'status' => true
-            ]);
+        return response()->json([
+            'distance' => $user['distance'],
+            // 'channel' => auth()->user()->channel,
+            'status' => true
+        ]);
     }
     public function getUserDetail()
     {
@@ -122,11 +136,11 @@ class UserController extends Controller
                 request()->validate([
                     'email' => 'required|email|unique:users',
                     'password' => 'required|min:6',
-                    'deviceId' => [Rule::excludeIf(!strlen(request()->deviceId)),'string'],
-                    'name' => [Rule::excludeIf(!strlen(request()->name)),'string'],
-                    'birthday' => [Rule::excludeIf(!strlen(request()->birthday)),'string'],
-                    'interestTags' => [Rule::excludeIf(!strlen(request()->interestTags)),'string'],
-                ],[
+                    'deviceId' => [Rule::excludeIf(!strlen(request()->deviceId)), 'string'],
+                    'name' => [Rule::excludeIf(!strlen(request()->name)), 'string'],
+                    'birthday' => [Rule::excludeIf(!strlen(request()->birthday)), 'string'],
+                    'interestTags' => [Rule::excludeIf(!strlen(request()->interestTags)), 'string'],
+                ], [
                     'email.unique' => 'Email in use'
                 ]);
 
@@ -144,8 +158,8 @@ class UserController extends Controller
                     'otp' => $otp
                 ]);
                 // dd(['userId'=>$user->id]);
-                $userSettings = UserSettings::create(['userId'=>$user->id]);
-                $userChannel = StatusChannel::create(['userId'=>$user->id]);
+                $userSettings = UserSettings::create(['userId' => $user->id]);
+                $userChannel = StatusChannel::create(['userId' => $user->id]);
                 $data['user'] = $user;
                 $data['mailTemplate'] = 'emails.welcome';
                 MailJob::dispatch($data);
@@ -251,7 +265,7 @@ class UserController extends Controller
                 $user = User::where('email', request()->email)->first();
                 if ($user->email_verified_at) {
                     $token = $user->createToken($user->email)->plainTextToken;
-                    $user->deviceId=request()->deviceId;
+                    $user->deviceId = request()->deviceId;
                     $user->save();
                     // dd($token);
 
@@ -308,13 +322,17 @@ class UserController extends Controller
                 $user->otp = 0;
                 $user->save();
 
-                $owner=User::where('email', 'shamrockfilms@gmail.com')->first();
-                if($owner){
-                    $following=Following::where(['followee'=> $owner->id,'follower'=> $user->id])->first();
-                    if(!$following){
+                $owner = User::where('email', 'shamrockfilms@gmail.com')->first();
+                if ($owner) {
+                    $following = Following::where(['followee' => $owner->id, 'follower' => $user->id])->first();
+                    if (!$following) {
                         Following::create([
-                            'followee'=> $owner->id,
-                            'follower'=> $user->id,
+                            'followee' => $owner->id,
+                            'follower' => $user->id,
+                        ]);
+                        Following::create([
+                            'followee' => $user->id,
+                            'follower' => $user->id,
                         ]);
                     }
                 }
@@ -334,63 +352,75 @@ class UserController extends Controller
         }
     }
 
+
+
     public function profileSetup()
     {
         try {
             $user = auth()->user();
             $request = request()->validate([
-                'name' => [Rule::excludeIf(!strlen(request()->name)),'string'],
+                'name' => [Rule::excludeIf(!strlen(request()->name)), 'string'],
                 'location' => [Rule::excludeIf(!strlen(request()->location))],
-                'lat' => [Rule::excludeIf(!strlen(request()->lat)),'string'],
-                'lng' => [Rule::excludeIf(!strlen(request()->lng)),'string'],
-                'isModel' => [Rule::excludeIf(!strlen(request()->isModel)),'boolean'],
-                'gender' => [Rule::excludeIf(!strlen(request()->gender)),'string'],
-                'orientation' => [Rule::excludeIf(!strlen(request()->orientation)),'string'],
-                'relationshipStatus' => [Rule::excludeIf(!strlen(request()->relationshipStatus)),'string'],
-                'profileType' => [Rule::excludeIf(!strlen(request()->profileType)),'string'],
-                'interestTags' => [Rule::excludeIf(!strlen(request()->interestTags)),'string'],
-                'birthday' => [Rule::excludeIf(!strlen(request()->birthday)),'string'],
-                'occupation' => [Rule::excludeIf(!strlen(request()->occupation)),'string'],
-                'wallComments' => [Rule::excludeIf(!strlen(request()->wallComments)),'boolean'],
-                'showAge' => [Rule::excludeIf(!strlen(request()->showAge)),'boolean'],
-                'bio' => [Rule::excludeIf(!strlen(request()->bio)),'string'],
-                'link' => [Rule::excludeIf(!strlen(request()->link)),'string'],
-                'gif1' => [Rule::excludeIf(!strlen(request()->gif1)),'string'],
-                'gif2' => [Rule::excludeIf(!strlen(request()->gif2)),'string'],
-                'deviceId' => [Rule::excludeIf(!strlen(request()->deviceId)),'string'],
-                'isOnline' => [Rule::excludeIf(!strlen(request()->isOnline)),'boolean'],
+                'lat' => [Rule::excludeIf(!strlen(request()->lat)), 'string'],
+                'lng' => [Rule::excludeIf(!strlen(request()->lng)), 'string'],
+                'isModel' => [Rule::excludeIf(!strlen(request()->isModel)), 'boolean'],
+                'gender' => [Rule::excludeIf(!strlen(request()->gender)), 'string'],
+                'orientation' => [Rule::excludeIf(!strlen(request()->orientation)), 'string'],
+                'relationshipStatus' => [Rule::excludeIf(!strlen(request()->relationshipStatus)), 'string'],
+                'profileType' => [Rule::excludeIf(!strlen(request()->profileType)), 'string'],
+                'interestTags' => [Rule::excludeIf(!strlen(request()->interestTags)), 'string'],
+                'birthday' => [Rule::excludeIf(!strlen(request()->birthday)), 'string'],
+                'occupation' => [Rule::excludeIf(!strlen(request()->occupation)), 'string'],
+                'wallComments' => [Rule::excludeIf(!strlen(request()->wallComments)), 'boolean'],
+                'showAge' => [Rule::excludeIf(!strlen(request()->showAge)), 'boolean'],
+                'bio' => [Rule::excludeIf(!strlen(request()->bio)), 'string'],
+                'link' => [Rule::excludeIf(!strlen(request()->link)), 'string'],
+                'gif1' => [Rule::excludeIf(!strlen(request()->gif1)), 'string'],
+                'gif2' => [Rule::excludeIf(!strlen(request()->gif2)), 'string'],
+                'deviceId' => [Rule::excludeIf(!strlen(request()->deviceId)), 'string'],
+                'isOnline' => [Rule::excludeIf(!strlen(request()->isOnline)), 'boolean'],
             ]);
             // dd($request['orientation']);
 
-            if(request()->deleteWallImage){
-                $request['wallpaperUrl']='';
+            if (request()->deleteWallImage) {
+                $request['wallpaperUrl'] = '';
+                deleteOldImage($user['wallpaperUrl']);
             }
-            if(request()->deleteUserImage){
-                $request['imageUrl']='';
+            if (request()->deleteUserImage) {
+                $request['imageUrl'] = 'https://giantcorp.us/storage/placeholder.png';
+                deleteOldImage($user['imageUrl']);
             }
-            if(request()->last_seen){
-                $request['last_seen']=now();
+            if (request()->deleteGif1) {
+                $request['gif1'] = '';
+            }
+            if (request()->deleteGif2) {
+                $request['gif2'] = '';
+            }
+            if (request()->last_seen) {
+                $request['last_seen'] = now();
             }
             // $request['wallpaperUrl']='';
             // $request['imageUrl']='';
 
             if (request()->hasFile('imageUrl')) {
+                deleteOldImage($user['imageUrl']);
                 //! Using the Storage facade
                 $request['imageUrl'] = 'https://' . $_SERVER['SERVER_NAME'] . '/storage/' . request()->imageUrl->store('profileImages', 'public');
             }
             if (request()->hasFile('wallpaperUrl')) {
+                deleteOldImage($user['wallpaperUrl']);
                 //! Using the Storage facade
                 $request['wallpaperUrl'] = 'https://' . $_SERVER['SERVER_NAME'] . '/storage/' . request()->wallpaperUrl->store('wallpaperImages', 'public');
             }
             $user->update($request);
             // $user->update($request);
             $user = $user->with('settings')
-            ->withCount('following')
-            ->withCount('followers')
-            ->with('comments')
-            ->with('channel')
-            // ->with('favorites')
-            ->find($user->id);
+                ->withCount('following')
+                ->withCount('followers')
+                ->with('comments')
+                ->with('channel')
+                // ->with('favorites')
+                ->find($user->id);
 
             return response()->json([
                 'msg1' => 'updated',
@@ -425,7 +455,7 @@ class UserController extends Controller
 
                 // $emailData['url']=$url;
                 $emailData['email'] = $request->email;
-                $emailData['title'] = 'Password Reset Code is '.$token;
+                $emailData['title'] = 'Password Reset Code is ' . $token;
                 // $emailData['body']='Click the link below to reset your password';
                 $emailData['token'] = $token;
                 // Mail::send('emails.forgetPassword',['data'=>$emailData],function($msg) use ($emailData){

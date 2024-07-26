@@ -95,7 +95,7 @@ class CommentsController extends Controller
                 "receiverId"=>$request->userId,
             ]);
             InNotificationEvent::dispatch($n);
-
+            $c['commentator']=$c->commentator;
             return response()->json([
                 'comment' => $c,
                 'msg' => 'comment added',
