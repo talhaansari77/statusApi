@@ -215,7 +215,7 @@ class SearchController extends Controller
                                     $lat = auth()->user()->lat;
                                     $lng = auth()->user()->lng;
                                     $query->select('followee as id', 'name', 'imageUrl', 'location', 'link', 'bio', 'lat', 'lng', 'profileType', 'isOnline', 'users.created_at', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) +
-                                    pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
+                                    pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1609.344  as distance'))
                                         ->withCount('following')
                                         ->withCount('followers')
                                         ->with([
@@ -375,7 +375,7 @@ class SearchController extends Controller
                                     $lat = auth()->user()->lat;
                                     $lng = auth()->user()->lng;
                                     $query->select('followee as id', 'name', 'imageUrl', 'location', 'link', 'bio', 'lat', 'lng', 'profileType', 'users.created_at', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) +
-                                    pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
+                                    pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1609.344  as distance'))
                                         ->withCount('following')
                                         ->withCount('followers')
                                         ->with([
@@ -554,7 +554,7 @@ class SearchController extends Controller
                         $lat = auth()->user()->lat;
                         $lng = auth()->user()->lng;
                         $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'lat', 'lng', 'profileType', 'isOnline', 'created_at', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) +
-                        pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
+                        pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1609.344  as distance'))
                             ->withCount('following')
                             ->withCount('followers')
                             ->with([
@@ -734,7 +734,7 @@ class SearchController extends Controller
                         $lat = auth()->user()->lat;
                         $lng = auth()->user()->lng;
                         $users = User::select('id', 'name', 'imageUrl', 'location', 'link', 'bio', 'lat', 'lng', 'profileType', 'isOnline', 'created_at', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) +
-                        pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
+                        pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1609.344  as distance'))
                             ->withCount('following')
                             ->withCount('followers')
                             ->with([

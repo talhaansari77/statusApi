@@ -151,6 +151,10 @@ class UserSettings extends Controller
     public function logout()
     {
         try {
+            $user = USER::find(auth()->user()->id);
+            $user->isOnline = 0;
+            $user->last_seen = now();
+            $user->save();
             auth()->user()->tokens()->delete();
             // $request->user()->currentAccessToken()->delete();
             return response([

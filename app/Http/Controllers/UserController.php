@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use App\Models\User;
 use App\Jobs\MailJob;
 use App\Mail\WelcomeMail;
@@ -80,7 +81,7 @@ class UserController extends Controller
         $lng = auth()->user()->lng;
 
         $user = User::select('id', DB::raw('ATAN2(SQRT(pow(cos(lat) * sin(lng-' . $lng . '), 2) + 
-            pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1000 as distance'))
+            pow(cos(' . $lat . ') * sin(lat) - sin(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '), 2)),sin(' . $lat . ') * sin(lat) + cos(' . $lat . ') * cos(lat) * cos(lng-' . $lng . '))*6371000/1609.344 as distance'))
             ->find(request()->id);
 
         return response()->json([
@@ -110,9 +111,12 @@ class UserController extends Controller
                     }
                 ])
                 ->find(request()->id);
+            $postCount= Post::where('user_id',auth()->user()->id)->count();
+            $user['updates_count']=$postCount;
 
             return response()->json([
                 'user' => $user,
+                // 'updates_count' => $postCount,
                 // 'channel' => auth()->user()->channel,
                 'status' => true
             ]);
@@ -266,6 +270,8 @@ class UserController extends Controller
                 if ($user->email_verified_at) {
                     $token = $user->createToken($user->email)->plainTextToken;
                     $user->deviceId = request()->deviceId;
+                    $user->isOnline = 1;
+                    $user->last_seen = now();
                     $user->save();
                     // dd($token);
 
@@ -339,7 +345,12 @@ class UserController extends Controller
                 return response()->json([
                     'msg' => 'you are verified',
                     'token' => $token,
-                    'user' => $user,
+                    'user' => User::with('settings')
+                        ->withCount('following')
+                        ->withCount('followers')
+                        ->with('comments')
+                        ->with('channel')
+                        ->find($user->id),
                     'status' => true
                 ]);
             }
@@ -379,6 +390,7 @@ class UserController extends Controller
                 'gif2' => [Rule::excludeIf(!strlen(request()->gif2)), 'string'],
                 'deviceId' => [Rule::excludeIf(!strlen(request()->deviceId)), 'string'],
                 'isOnline' => [Rule::excludeIf(!strlen(request()->isOnline)), 'boolean'],
+                'video_url' => [Rule::excludeIf(!strlen(request()->video_url)), 'string'],
             ]);
             // dd($request['orientation']);
 

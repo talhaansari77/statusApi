@@ -49,6 +49,7 @@ class User extends Authenticatable
         'orientation',
         'relationshipStatus',
         'last_seen',
+        'video_url',
         
     ];
 
